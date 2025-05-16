@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="StoryApp - Bagikan cerita Anda dengan lokasi"
+    />
+
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#343a40" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="StoryApp" />
+    <link rel="apple-touch-icon" href="images/icons/ios/192.png" />
+    <link rel="shortcut icon" href="favicon.png" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"
+    />
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+    <title>StoryApp</title>
+    <style>
+      /* Tambahan CSS untuk Notifikasi */
+      .notifications-panel {
+        position: fixed;
+        right: 20px;
+        top: 70px;
+        width: 300px;
+        max-height: 400px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        z-index: 1000;
+        display: none;
+      }
+      
+      .notifications-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+        background-color: #343a40;
+        color: white;
+      }
+      
+      .notifications-title {
+        font-weight: bold;
+        margin: 0;
+      }
+      
+      .close-notifications {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+      }
+      
+      .notifications-list {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        max-height: 350px;
+        overflow-y: auto;
+      }
+      
+      .notification-item {
+        padding: 12px 15px;
+        border-bottom: 1px solid #eee;
+      }
+      
+      .notification-item:last-child {
+        border-bottom: none;
+      }
+      
+      .notification-title {
+        font-weight: bold;
+        margin: 0 0 5px 0;
+      }
+      
+      .notification-body {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+      }
+      
+      .notification-time {
+        font-size: 12px;
+        color: #999;
+        margin-top: 5px;
+      }
+      
+      .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: red;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+      }
+      
+      .notification-bell {
+        position: fixed;
+        top: 75px;
+        right: -120px;
+        background-color: #343a40;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        z-index: 1001;
+      }
+      
+      .dummy-notification-toggle {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #343a40;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 15px;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        z-index: 1001;
+        display: flex;
+        align-items: center;
+      }
+      
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+        margin-left: 10px;
+      }
+      
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 24px;
+      }
+      
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+      }
+      
+      input:checked + .slider {
+        background-color: #2196F3;
+      }
+      
+      input:checked + .slider:before {
+        transform: translateX(26px);
+      }
+      
+      .no-notifications {
+        padding: 20px;
+        text-align: center;
+        color: #666;
+      }
+      
+      /* Responsive adjustments */
+      @media (max-width: 600px) {
+        .notifications-panel {
+          width: 90%;
+          right: 5%;
+          left: 5%;
+        }
+        
+        .notification-bell {
+          right: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link" id="skip-to-content"
+      >Lewati ke konten utama</a
+    >
+
+    <header>
+      <div class="main-header container">
+        <a class="brand-name" href="#/">
+          <img src="images/logo.png" alt="Logo StoryApp" class="logo" />
+          StoryApp
+        </a>
+
+        <nav
+          id="navigation-drawer"
+          class="navigation-drawer"
+          aria-label="Navigasi Utama"
+        >
+          <ul id="nav-list" class="nav-list">
+            <li><a href="#/">Beranda</a></li>
+            <li><a href="#/map">Tampilan Peta</a></li>
+
+            <div id="user-nav" class="hidden">
+              <li><a href="#/add" class="add-story-btn">Tambah Cerita</a></li>
+            </div>
+
+            <li><a href="#/about">Tentang</a></li>
+
+            <div id="user-nav-2" class="hidden">
+              <li>
+                <button id="logout-btn" class="logout-btn">Keluar</button>
+              </li>
+            </div>
+
+            <div id="auth-nav">
+              <li><a href="#/login">Masuk</a></li>
+              <li><a href="#/register">Daftar</a></li>
+            </div>
+          </ul>
+        </nav>
+
+        <button
+          id="drawer-button"
+          class="drawer-button"
+          aria-label="Tombol menu"
+        >
+          ☰
+        </button>
+      </div>
+    </header>
+
+    <!-- Notifikasi Bell Button -->
+    <button id="notification-bell" class="notification-bell" aria-label="Notifikasi">
+      🔔
+      <span id="notification-badge" class="notification-badge" style="display: none;">0</span>
+    </button>
+
+    <!-- Notifications Panel -->
+    <div id="notifications-panel" class="notifications-panel">
+      <div class="notifications-header">
+        <h3 class="notifications-title">Notifikasi</h3>
+        <button id="close-notifications" class="close-notifications" aria-label="Tutup panel notifikasi">×</button>
+      </div>
+      <ul id="notifications-list" class="notifications-list">
+        <!-- Notifications will be inserted here dynamically -->
+        <li class="no-notifications">Tidak ada notifikasi</li>
+      </ul>
+    </div>
+
+    <!-- Dummy Notification Toggle -->
+    <div id="dummy-notification-toggle" class="dummy-notification-toggle">
+      Notifikasi Dummy
+      <label class="switch">
+        <input type="checkbox" id="dummy-notification-switch">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <main id="main-content" class="main-content" tabindex="2"></main>
+
+    <footer>
+      <div class="container">
+        <p>&copy; 2025 StoryApp - Bagikan cerita Anda dengan lokasi</p>
+      </div>
+    </footer>
+
+    <script>
+      // Auth Navigation Logic
+      const authNav = document.getElementById("auth-nav");
+      const userNav = document.getElementById("user-nav");
+      const userNav2 = document.getElementById("user-nav-2");
+
+      function updateNav() {
+        const sudahMasuk = !!localStorage.getItem("storyapp_auth");
+        if (sudahMasuk) {
+          authNav.classList.add("hidden");
+          userNav.classList.remove("hidden");
+          userNav2.classList.remove("hidden");
+        } else {
+          authNav.classList.remove("hidden");
+          userNav.classList.add("hidden");
+          userNav2.classList.add("hidden");
+        }
+      }
+
+      // Jalankan saat halaman dimuat
+      updateNav();
+
+      // Pendengar untuk tombol keluar
+      document.getElementById("logout-btn")?.addEventListener("click", () => {
+        localStorage.removeItem("storyapp_auth");
+        window.location.hash = "#/";
+        window.location.reload();
+      });
+
+      // ========== NOTIFICATION SYSTEM ==========
+      
+      // Elemen UI notifikasi
+      const notificationBell = document.getElementById('notification-bell');
+      const notificationBadge = document.getElementById('notification-badge');
+      const notificationsPanel = document.getElementById('notifications-panel');
+      const closeNotifications = document.getElementById('close-notifications');
+      const notificationsList = document.getElementById('notifications-list');
+      const dummyNotificationSwitch = document.getElementById('dummy-notification-switch');
+      
+      // Variabel untuk menyimpan notifikasi
+      let notifications = [];
+      let unreadCount = 0;
+      
+      // Format waktu untuk notifikasi
+      function formatTime(timestamp) {
+        const date = new Date(timestamp);
+        return date.toLocaleString('id-ID', { 
+          day: 'numeric', 
+          month: 'short', 
+          year: 'numeric',
+          hour: '2-digit', 
+          minute: '2-digit' 
+        });
+      }
+      
+      // Tampilkan notifikasi di panel
+      function renderNotifications() {
+        if (notifications.length === 0) {
+          notificationsList.innerHTML = '<li class="no-notifications">Tidak ada notifikasi</li>';
+          return;
+        }
+        
+        notificationsList.innerHTML = '';
+        notifications.forEach(notification => {
+          const li = document.createElement('li');
+          li.className = 'notification-item';
+          li.innerHTML = `
+            <h4 class="notification-title">${notification.title}</h4>
+            <p class="notification-body">${notification.options.body}</p>
+            <p class="notification-time">${formatTime(notification.timestamp)}</p>
+          `;
+          notificationsList.appendChild(li);
+        });
+      }
+      
+      // Update badge notifikasi
+      function updateNotificationBadge() {
+        if (unreadCount > 0) {
+          notificationBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+          notificationBadge.style.display = 'flex';
+        } else {
+          notificationBadge.style.display = 'none';
+        }
+      }
+      
+      // Toggle panel notifikasi
+      notificationBell.addEventListener('click', () => {
+        const isVisible = notificationsPanel.style.display === 'block';
+        notificationsPanel.style.display = isVisible ? 'none' : 'block';
+        
+        if (!isVisible) {
+          // Reset counter saat panel dibuka
+          unreadCount = 0;
+          updateNotificationBadge();
+        }
+      });
+      
+      // Tutup panel notifikasi
+      closeNotifications.addEventListener('click', () => {
+        notificationsPanel.style.display = 'none';
+      });
+      
+      // Toggle notifikasi dummy
+      dummyNotificationSwitch.addEventListener('change', () => {
+        toggleDummyNotifications(dummyNotificationSwitch.checked);
+      });
+      
+      // Fungsi untuk mengaktifkan/menonaktifkan notifikasi dummy
+      function toggleDummyNotifications(enabled) {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.ready.then(registration => {
+            registration.active.postMessage({
+              command: 'SET_DUMMY_NOTIFICATIONS',
+              enabled: enabled
+            });
+          });
+        }
+      }
+      
+      // Minta izin notifikasi
+      async function requestNotificationPermission() {
+        if ('Notification' in window) {
+          const permission = await Notification.requestPermission();
+          return permission === 'granted';
+        }
+        return false;
+      }
+      
+      // Setup Push Notification
+      async function setupPushNotification() {
+        if (!('PushManager' in window)) {
+          console.log('Push notification tidak didukung');
+          return;
+        }
+        
+        try {
+          const hasPermission = await requestNotificationPermission();
+          if (!hasPermission) {
+            console.log('Izin notifikasi ditolak');
+            return;
+          }
+          
+          const registration = await navigator.serviceWorker.ready;
+          const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlB64ToUint8Array('BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk')
+          });
+          
+          // Kirim subscription ke server
+          console.log('Push subscription berhasil:', subscription);
+          
+          // TODO: Kirim ke server API dengan fetch
+          // await fetch('/notifications/subscribe', {
+          //   method: 'POST', 
+          //   headers: {'Content-Type': 'application/json'},
+          //   body: JSON.stringify(subscription)
+          // });
+        } catch (error) {
+          console.error('Gagal setup push notification:', error);
+        }
+      }
+      
+      // Mengkonversi VAPID key
+      function urlB64ToUint8Array(base64) {
+        const padding = '='.repeat((4 - base64.length % 4) % 4);
+        const b64 = (base64 + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const raw = atob(b64);
+        const arr = new Uint8Array(raw.length);
+        for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+        return arr;
+      }
+      
+      // Jalankan saat halaman dimuat
+      document.addEventListener('DOMContentLoaded', async () => {
+        // Izin notifikasi
+        await setupPushNotification();
+      });
+
+      // ========== SERVICE WORKER INTEGRATION ==========
+      
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          // Registrasi Service Worker
+          navigator.serviceWorker
+            .register("/sw.js")
+            .then((registration) => {
+              console.log(
+                "ServiceWorker registration successful with scope: ",
+                registration.scope
+              );
+              
+              // Setelah Service Worker aktif, minta notifikasi tersimpan
+              if (registration.active) {
+                registration.active.postMessage('FLUSH_NOTIFICATIONS');
+                registration.active.postMessage('GET_DUMMY_NOTIFICATIONS_STATUS');
+              }
+            })
+            .catch((error) => {
+              console.log("ServiceWorker registration failed: ", error);
+            });
+            
+          // Menangani pesan dari Service Worker
+          navigator.serviceWorker.addEventListener('message', event => {
+            const data = event.data;
+            
+            if (data.type === 'PENDING_NOTIFICATIONS') {
+              // Terima notifikasi tersimpan
+              console.log('Menerima notifikasi tersimpan:', data.notifications);
+              notifications = data.notifications || [];
+              renderNotifications();
+            } 
+            else if (data.type === 'NEW_NOTIFICATION') {
+              // Notifikasi baru diterima
+              console.log('Menerima notifikasi baru:', data.notification);
+              notifications.unshift(data.notification);
+              unreadCount++;
+              updateNotificationBadge();
+              renderNotifications();
+            }
+            else if (data.type === 'DUMMY_NOTIFICATIONS_STATUS') {
+              // Update status toggle notifikasi dummy
+              console.log('Status notifikasi dummy:', data.enabled);
+              dummyNotificationSwitch.checked = data.enabled;
+            }
+          });
+        });
+        
+        // Minta flush notifikasi ketika halaman difokuskan
+        window.addEventListener('focus', () => {
+          if (navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage('FLUSH_NOTIFICATIONS');
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
