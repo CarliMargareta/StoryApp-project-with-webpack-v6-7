@@ -41,7 +41,7 @@ if (workbox) {
       cacheName: 'storyapp-pages-cache',
       plugins: [
         new workbox.cacheableResponse.CacheableResponsePlugin({
-          statuses: [0, 200], // Cache response yang berhasil atau opaque
+          statuses: [200], // Cache response yang berhasil atau opaque
         }),
       ],
     })
@@ -67,7 +67,7 @@ if (workbox) {
       cacheName: 'storyapp-cdn-cache',
       plugins: [
         new workbox.cacheableResponse.CacheableResponsePlugin({
-          statuses: [0, 200],
+          statuses: [200],
         }),
         new workbox.expiration.ExpirationPlugin({
           maxEntries: 50, // Batasi jumlah entri
