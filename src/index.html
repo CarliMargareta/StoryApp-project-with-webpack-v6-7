@@ -12,7 +12,6 @@
       <link rel="apple-touch-icon" href="images/icons/ios/192.png" />
       <link rel="shortcut icon" href="favicon.png" />
 
-      <!-- Bootstrap CSS -->
       <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         rel="stylesheet"
@@ -20,20 +19,19 @@
         crossorigin="anonymous"
       />
       
-      <!-- Font Awesome untuk ikon yang lebih bagus -->
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
       
-      <!-- Leaflet CSS -->
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
       <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
       
-      <!-- SweetAlert2 CSS -->
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" />
       
-      <!-- Google Fonts -->
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
 
       <title>StoryApp</title>
 
@@ -52,7 +50,6 @@
           --danger: #dc3545;
           --success: #198754;
         }
-        
         body {
           font-family: 'Poppins', sans-serif;
           background-color: var(--background);
@@ -62,55 +59,38 @@
           display: flex;
           flex-direction: column;
         }
-        
-        .hidden { 
-          display: none !important; 
-        }
-        
-        .skip-link { 
-          position: absolute; 
-          top: -40px; 
-          left: 0; 
-          background: var(--primary-dark); 
-          color: white; 
-          padding: 8px; 
-          z-index: 100; 
-          text-decoration: none;
+        .hidden { display: none !important; }
+        .skip-link {
+          position: absolute; top: -40px; left: 0;
+          background: var(--primary-dark); color: white;
+          padding: 8px; z-index: 100; text-decoration: none;
           transition: top 0.3s;
         }
-        
-        .skip-link:focus { 
-          top: 0; 
-        }
-        
+        .skip-link:focus { top: 0; }
+
         /* Navbar styling */
         .navbar {
           box-shadow: 0 2px 10px rgba(0,0,0,0.1);
           padding: 12px 0;
         }
-        
         .navbar-brand {
           font-weight: 600;
           display: flex;
           align-items: center;
         }
-        
-        .navbar-brand img.logo { 
-          height: 32px; 
-          margin-right: 10px; 
+        .navbar-brand img.logo {
+          height: 32px;
+          margin-right: 10px;
         }
-        
         .nav-link {
           font-weight: 500;
           padding: 8px 16px !important;
           border-radius: 4px;
           transition: all 0.3s ease;
         }
-        
         .nav-link:hover {
           background-color: rgba(255, 255, 255, 0.2);
         }
-        
         .btn-primary {
           background-color: var(--accent);
           border-color: var(--accent);
@@ -119,236 +99,129 @@
           border-radius: 4px;
           transition: all 0.3s ease;
         }
-        
         .btn-primary:hover {
           background-color: #e67211;
           border-color: #e67211;
           transform: translateY(-2px);
         }
-        
         .btn-outline-light {
           font-weight: 500;
           padding: 8px 20px;
           border-radius: 4px;
           transition: all 0.3s ease;
         }
-        
         .btn-outline-light:hover {
           transform: translateY(-2px);
         }
-        
+
         /* Notification styling */
-        .notification-bell { 
-          position: fixed; 
-          top: 80px; 
-          right: 30px; 
-          background-color: var(--primary); 
-          color: white; 
-          border: none; 
-          border-radius: 50%; 
-          width: 48px; 
-          height: 48px; 
-          display: flex; 
-          align-items: center; 
-          justify-content: center; 
-          cursor: pointer; 
-          font-size: 22px; 
-          box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
-          z-index: 1050;
-          transition: transform 0.3s ease, background-color 0.3s ease;
+        .notification-bell {
+          position: fixed; top: 80px; right: 30px;
+          background-color: var(--primary); color: white;
+          border: none; border-radius: 50%; width: 48px; height: 48px;
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer; font-size: 22px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+          z-index: 1050; transition: transform 0.3s ease, background-color 0.3s ease;
         }
-        
         .notification-bell:hover {
-          transform: scale(1.1);
-          background-color: var(--primary-dark);
+          transform: scale(1.1); background-color: var(--primary-dark);
         }
-        
-        .notification-badge { 
-          position: absolute; 
-          top: -5px; 
-          right: -5px; 
-          background-color: var(--danger); 
-          color: white; 
-          border-radius: 50%; 
-          width: 22px; 
-          height: 22px; 
-          display: flex; 
-          align-items: center; 
-          justify-content: center; 
-          font-size: 12px; 
-          font-weight: bold;
-          border: 2px solid white;
+        .notification-badge {
+          position: absolute; top: -5px; right: -5px;
+          background-color: var(--danger); color: white;
+          border-radius: 50%; width: 22px; height: 22px;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 12px; font-weight: bold; border: 2px solid white;
         }
-        
-        .notifications-panel { 
-          position: fixed; 
-          right: 30px; 
-          top: 140px; 
-          width: 350px; 
-          max-height: 500px; 
-          background-color: white; 
-          border-radius: 12px; 
-          box-shadow: 0 5px 25px rgba(0,0,0,0.15); 
-          overflow: hidden; 
-          z-index: 1040;
-          transition: transform 0.3s ease;
-          transform-origin: top right;
+        .notifications-panel {
+          position: fixed; right: 30px; top: 140px;
+          width: 350px; max-height: 500px;
+          background-color: white; border-radius: 12px;
+          box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+          overflow: hidden; z-index: 1040;
+          transition: transform 0.3s ease, opacity 0.3s ease; transform-origin: top right;
+          opacity: 0;
+          transform: scale(0.95);
         }
-        
-        .notifications-header { 
-          display: flex; 
-          justify-content: space-between; 
-          align-items: center; 
-          padding: 16px 20px; 
-          background-color: var(--primary); 
-          color: white; 
+        .notifications-panel:not(.hidden) {
+          opacity: 1;
+          transform: scale(1);
         }
-        
-        .notifications-title { 
-          margin: 0; 
-          font-weight: 600;
-          font-size: 1.1rem;
+        .notifications-header {
+          display: flex; justify-content: space-between; align-items: center;
+          padding: 16px 20px; background-color: var(--primary); color: white;
         }
-        
-        .close-notifications { 
-          background: none; 
-          border: none; 
-          color: white; 
-          font-size: 24px; 
-          cursor: pointer;
-          transition: transform 0.2s ease;
+        .notifications-title {
+          margin: 0; font-weight: 600; font-size: 1.1rem;
         }
-        
-        .close-notifications:hover {
-          transform: scale(1.2);
+        .close-notifications {
+          background: none; border: none; color: white; font-size: 24px;
+          cursor: pointer; transition: transform 0.2s ease;
         }
-        
-        .notifications-actions { 
-          padding: 12px 20px; 
-          background-color: #f5f5f5; 
-          border-bottom: 1px solid var(--border); 
-          text-align: right; 
+        .close-notifications:hover { transform: scale(1.2); }
+        .notifications-actions {
+          padding: 12px 20px; background-color: #f5f5f5;
+          border-bottom: 1px solid var(--border); text-align: right;
         }
-        
-        .notifications-list { 
-          list-style: none; 
-          margin: 0; 
-          padding: 0; 
-          max-height: 350px; 
-          overflow-y: auto; 
+        .notifications-actions .btn { margin-left: 0.5rem; }
+        .notifications-list {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          max-height: 100px; /* Atur tinggi maksimum sesuai keinginan Anda */
+          overflow-y: auto; /* Tambahkan scrollbar vertikal jika konten melebihi max-height */
         }
-        
-        .notification-item { 
-          padding: 16px 20px; 
-          border-bottom: 1px solid var(--border); 
-          position: relative; 
-          cursor: pointer;
+        .notification-item {
+          padding: 16px 20px; border-bottom: 1px solid var(--border);
+          position: relative; cursor: pointer;
           transition: background-color 0.2s ease;
         }
-        
-        .notification-item h4 {
-          font-size: 1rem;
-          font-weight: 600;
-          margin-bottom: 5px;
-          padding-right: 30px;
-        }
-        
-        .notification-item p {
-          font-size: 0.9rem;
-          margin-bottom: 8px;
-          color: var(--light-text);
-        }
-        
-        .notification-item small {
-          font-size: 0.75rem;
-          color: var(--light-text);
-        }
-        
-        .notification-item:hover {
-          background-color: #f9f9f9;
-        }
-        
-        .notification-item.unread { 
+        .notification-item.unread {
           background-color: var(--notification-unread);
           border-left: 4px solid var(--primary);
         }
-        
-        .notification-item.unread:hover {
-          background-color: var(--notification-bg);
+        .notification-item:hover {
+          background-color: #f9f9f9;
         }
-        
-        .notification-delete { 
-          position: absolute; 
-          top: 16px; 
-          right: 16px; 
-          background: none; 
-          border: none; 
-          color: var(--danger); 
-          font-size: 16px; 
-          cursor: pointer;
-          opacity: 0.6;
+        .notification-item h4 {
+          font-size: 1rem; font-weight: 600; margin-bottom: 5px; padding-right: 30px;
+        }
+        .notification-item p {
+          font-size: 0.9rem; margin-bottom: 8px; color: var(--light-text);
+        }
+        .notification-item small {
+          font-size: 0.75rem; color: var(--light-text);
+        }
+        .notification-delete {
+          position: absolute; top: 16px; right: 16px;
+          background: none; border: none; color: var(--danger);
+          font-size: 16px; cursor: pointer; opacity: 0.6;
           transition: opacity 0.2s ease, transform 0.2s ease;
         }
-        
-        .notification-delete:hover { 
-          opacity: 1;
-          transform: scale(1.1);
+        .notification-delete:hover { opacity: 1; transform: scale(1.1); }
+        .no-notifications {
+          padding: 30px 20px; text-align: center;
+          color: var(--light-text); font-style: italic;
         }
-        
-        .no-notifications { 
-          padding: 30px 20px; 
-          text-align: center; 
-          color: var(--light-text);
-          font-style: italic;
-        }
-        
+
         /* Main content */
-        .main-content { 
-          padding-top: 80px;
-          flex: 1;
-        }
-        
+        .main-content { padding-top: 80px; flex: 1; }
+
         /* Footer */
-        footer { 
-          background-color: var(--primary); 
-          color: white;
-          padding: 25px 0; 
-          text-align: center; 
-          margin-top: 40px;
+        footer {
+          background-color: var(--primary); color: white;
+          padding: 25px 0; text-align: center; margin-top: 40px;
         }
-        
-        footer p {
-          margin-bottom: 0;
-        }
-        
-        /* Sweet Alert customization */
-        .swal2-popup {
-          font-family: 'Poppins', sans-serif;
-          border-radius: 12px;
-        }
-        
-        .swal2-title {
-          font-weight: 600;
-        }
-        
-        .swal2-confirm {
-          background-color: var(--primary) !important;
-          border-radius: 4px !important;
-        }
-        
-        .swal2-cancel {
-          border-radius: 4px !important;
-        }
-        
-        /* Animation styles */
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .fadeIn {
-          animation: fadeIn 0.3s ease forwards;
-        }
+        footer p { margin-bottom: 0; }
+
+        /* Sweet Alert */
+        .swal2-popup { font-family: 'Poppins', sans-serif; border-radius: 12px; }
+        .swal2-title { font-weight: 600; }
+        .swal2-confirm { background-color: var(--primary) !important; border-radius: 4px !important; }
+        .swal2-cancel { border-radius: 4px !important; }
+
+        /* Animations (digunakan oleh panel notifikasi) */
+        /* Tidak perlu @keyframes fadeIn lagi karena transisi langsung di .notifications-panel */
       </style>
     </head>
     <body>
@@ -360,7 +233,15 @@
               <img src="images/logo.png" alt="Logo StoryApp" class="logo d-inline-block align-text-top" />
               StoryApp
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navigation-drawer" aria-controls="navigation-drawer" aria-expanded="false" aria-label="Tombol menu">
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navigation-drawer"
+              aria-controls="navigation-drawer"
+              aria-expanded="false"
+              aria-label="Tombol menu"
+            >
               <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navigation-drawer">
@@ -389,9 +270,10 @@
         </div>
         <div class="notifications-actions">
           <button id="mark-all-read" class="btn btn-sm btn-light"><i class="fas fa-check-double me-1"></i> Tandai Semua Dibaca</button>
+          <button id="delete-all" class="btn btn-sm btn-light"><i class="fas fa-trash me-1 mt-2"></i> Hapus Semua</button>
         </div>
         <ul id="notifications-list" class="notifications-list">
-          <li class="no-notifications">Tidak ada notifikasi</li>
+          <li class="no-notifications"><i class="fas fa-inbox me-2"></i>Tidak ada notifikasi</li>
         </ul>
       </div>
 
@@ -413,26 +295,17 @@
         </div>
       </footer>
 
-      <!-- Scripts -->
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
       <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
       <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+
       <script>
         // Navigation and Auth
         const navLogin = document.getElementById('nav-login');
         const navRegister = document.getElementById('nav-register');
         const navAddStory = document.getElementById('nav-add-story');
         const navLogout = document.getElementById('nav-logout');
-        const bell = document.getElementById('notification-bell');
-        const badge = document.getElementById('notification-badge');
-        const panel = document.getElementById('notifications-panel');
-        const closeBtn = document.getElementById('close-notifications');
-        const markAllBtn = document.getElementById('mark-all-read');
-        const listEl = document.getElementById('notifications-list');
-
-        let notifications = [];
-        let unreadCount = 0;
 
         function updateNav() {
           const authData = JSON.parse(localStorage.getItem('storyapp_auth'));
@@ -449,6 +322,7 @@
             navAddStory.classList.add('hidden');
             navLogout.classList.add('hidden');
             bell.classList.add('hidden');
+            panel.classList.add('hidden'); // Sembunyikan panel jika logout
           }
         }
 
@@ -460,240 +334,314 @@
             showCancelButton: true,
             confirmButtonText: 'Ya, Keluar',
             cancelButtonText: 'Batal',
-            confirmButtonColor: '#0dcaf0',
-            cancelButtonColor: '#6c757d',
+            confirmButtonColor: 'var(--primary)',
+            cancelButtonColor: 'var(--secondary)',
           }).then((result) => {
             if (result.isConfirmed) {
+              // Beritahu SW untuk unsubscribe jika perlu
+              // postMessageToSW({ type: 'UNSUBSCRIBE' }); // Anda perlu endpoint di sini jika ingin unsubscribe dari server
               localStorage.removeItem('storyapp_auth');
+              notifications = []; // Kosongkan notifikasi lokal
+              unreadCount = 0;
+              updateBadge();
+              renderNotifications();
+              updateNav(); // Update navbar
               Swal.fire({
                 title: 'Berhasil Keluar',
-                text: 'Anda telah berhasil keluar dari akun',
+                text: 'Anda telah berhasil keluar dari akun.',
                 icon: 'success',
-                confirmButtonColor: '#0dcaf0',
+                confirmButtonColor: 'var(--primary)',
                 timer: 2000,
                 timerProgressBar: true
               }).then(() => {
-                window.location.href = '#/';
-                window.location.reload();
+                window.location.hash = '/'; // Arahkan ke beranda
+                // window.location.reload(); // Reload mungkin tidak perlu jika updateNav dan render sudah cukup
               });
             }
           });
         });
 
         // Notification UI
+        const bell = document.getElementById('notification-bell');
+        const badge = document.getElementById('notification-badge');
+        const panel = document.getElementById('notifications-panel');
+        const closeBtn = document.getElementById('close-notifications');
+        const markAllBtn = document.getElementById('mark-all-read');
+        const deleteAllBtn = document.getElementById('delete-all');
+        const listEl = document.getElementById('notifications-list');
+
+        let notifications = [];
+        let unreadCount = 0;
+
         function formatTime(ts) {
-          return new Date(ts).toLocaleString('id-ID', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+          if (!ts) return 'Waktu tidak diketahui';
+          return new Date(ts).toLocaleString('id-ID', {
+            day: 'numeric', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+          });
         }
-        
+
         function updateBadge() {
           if (unreadCount > 0) {
             badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
             badge.style.display = 'flex';
-          } else badge.style.display = 'none';
+          } else {
+            badge.style.display = 'none';
+          }
         }
-        
+
         function renderNotifications() {
-          listEl.innerHTML = ''; 
-          if (!notifications.length) return listEl.innerHTML = '<li class="no-notifications"><i class="fas fa-inbox me-2"></i>Tidak ada notifikasi</li>';
+          listEl.innerHTML = '';
+          if (notifications.length === 0) {
+            listEl.innerHTML = '<li class="no-notifications"><i class="fas fa-inbox me-2"></i>Tidak ada notifikasi</li>';
+            markAllBtn.disabled = true;
+            deleteAllBtn.disabled = true;
+            return;
+          }
           
+          markAllBtn.disabled = notifications.filter(n => !n.read).length === 0;
+          deleteAllBtn.disabled = false;
+
           notifications.forEach(n => {
             const li = document.createElement('li');
             li.className = n.read ? 'notification-item' : 'notification-item unread';
             li.dataset.id = n.id;
             
+            const title = n.title || 'Notifikasi';
+            const body = n.options?.body || 'Anda memiliki pesan baru.';
+            const timestamp = n.timestamp;
+
             li.innerHTML = `
-              <h4>${n.title}</h4>
-              <p>${n.options.body}</p>
-              <small><i class="far fa-clock me-1"></i>${formatTime(n.timestamp)}</small>
-              <button class="notification-delete" aria-label="Hapus"><i class="fas fa-trash-alt"></i></button>
+              <h4>${title}</h4>
+              <p>${body}</p>
+              <small><i class="far fa-clock me-1"></i>${formatTime(timestamp)}</small>
+              <button class="notification-delete" aria-label="Hapus Notifikasi"><i class="fas fa-trash-alt"></i></button>
             `;
-            
-            li.addEventListener('click', () => markAsRead(n.id));
-            li.querySelector('.notification-delete').addEventListener('click', e => { 
-              e.stopPropagation(); 
-              confirmDeleteNotification(n.id); 
+            // Event listener untuk menandai sebagai dibaca (jika belum) atau membuka notifikasi
+            li.addEventListener('click', () => {
+              if (!n.read) {
+                markAsRead(n.id);
+              }
+              // Jika ada URL di notifikasi, Anda bisa navigasi ke sana
+              if (n.options?.data?.url) {
+                  // Coba navigasi jika URL valid, misal:
+                  // window.location.hash = n.options.data.url;
+                  // panel.classList.add('hidden');
+                  console.log('Notification clicked, URL:', n.options.data.url);
+              }
             });
-            
+            li.querySelector('.notification-delete').addEventListener('click', e => {
+              e.stopPropagation(); // Mencegah event click pada li
+              deleteNotification(n.id);
+            });  
             listEl.appendChild(li);
           });
         }
 
-        function markAsRead(id) {
-          navigator.serviceWorker.controller.postMessage({ type:'MARK_AS_READ', id });
-          
-          // Ganti dengan SweetAlert untuk konfirmasi
-          const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true
-          });
-          
-          Toast.fire({
-            icon: 'success',
-            title: 'Notifikasi ditandai sebagai dibaca'
-          });
+        async function postMessageToSW(message) {
+          if (!navigator.serviceWorker || !navigator.serviceWorker.ready) {
+            console.warn('Service Worker tidak siap atau tidak didukung.');
+            Swal.fire('Error', 'Service Worker tidak siap. Coba refresh halaman.', 'error');
+            return;
+          }
+          try {
+            const registration = await navigator.serviceWorker.ready;
+            if (registration.active) {
+              registration.active.postMessage(message);
+            } else {
+              console.warn('Tidak ada Service Worker aktif.');
+              Swal.fire('Error', 'Service Worker tidak aktif. Coba refresh halaman.', 'error');
+            }
+          } catch (error) {
+              console.error('Error mengirim pesan ke SW:', error);
+              Swal.fire('Error', 'Gagal berkomunikasi dengan Service Worker.', 'error');
+          }
         }
         
-        function confirmDeleteNotification(id) {
+        function markAsRead(id) {
+          const item = notifications.find(x => x.id === id);
+          if (item && !item.read) {
+            // Update optimistik di client
+            item.read = true;
+            unreadCount = Math.max(0, unreadCount - 1); // Pastikan tidak negatif
+            updateBadge();
+            renderNotifications(); // Re-render untuk menghilangkan .unread class
+            postMessageToSW({ type: 'MARK_AS_READ', id });
+          }
+        }
+
+        function deleteNotification(id) {
+          const itemIndex = notifications.findIndex(x => x.id === id);
+          if (itemIndex > -1) {
+            const item = notifications[itemIndex];
+            // Update optimistik
+            if (!item.read) {
+              unreadCount = Math.max(0, unreadCount - 1);
+            }
+            notifications.splice(itemIndex, 1);
+            updateBadge();
+            renderNotifications();
+            postMessageToSW({ type: 'DELETE_NOTIFICATION', id });
+            Swal.fire({
+                toast: true, position: 'top-end', icon: 'success',
+                title: 'Notifikasi dihapus', showConfirmButton: false, timer: 1500
+            });
+          }
+        }
+
+        markAllBtn.addEventListener('click', () => {
+          const unreadNotifications = notifications.filter(n => !n.read);
+          if (unreadNotifications.length === 0) {
+            Swal.fire({ icon: 'info', title: 'Informasi', text: 'Tidak ada notifikasi yang belum dibaca.' });
+            return;
+          }
+          // Update optimistik
+          unreadNotifications.forEach(n => n.read = true);
+          unreadCount = 0;
+          updateBadge();
+          renderNotifications();
+          postMessageToSW({ type: 'MARK_ALL_AS_READ' });
+          Swal.fire({ icon: 'success', title: 'Selesai', text: 'Semua notifikasi telah ditandai sebagai dibaca.' });
+        });
+
+        deleteAllBtn.addEventListener('click', () => {
+          if (notifications.length === 0) {
+            Swal.fire({ icon: 'info', title: 'Kosong', text: 'Tidak ada notifikasi untuk dihapus.' });
+            return;
+          }
           Swal.fire({
-            title: 'Hapus notifikasi?',
-            text: 'Anda tidak dapat mengembalikan notifikasi yang dihapus',
+            title: 'Hapus Semua Notifikasi?',
+            text: 'Tindakan ini akan menghapus semua notifikasi dari daftar. Tindakan ini tidak dapat dikembalikan.',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Ya, Hapus',
+            confirmButtonText: 'Ya, Hapus Semua',
             cancelButtonText: 'Batal',
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-          }).then((result) => {
-            if (result.isConfirmed) {
-              deleteNotification(id);
+            confirmButtonColor: 'var(--danger)',
+            cancelButtonColor: 'var(--secondary)',
+          }).then(res => {
+            if (res.isConfirmed) {
+              // Update optimistik
+              notifications = [];
+              unreadCount = 0;
+              updateBadge();
+              renderNotifications();
+              postMessageToSW({ type: 'CLEAR_NOTIFICATIONS' });
+              Swal.fire({ icon: 'success', title: 'Terhapus', text: 'Semua notifikasi telah dihapus dari daftar.' });
             }
           });
-        }
-        
-        function deleteNotification(id) {
-          navigator.serviceWorker.controller.postMessage({ type:'DELETE_NOTIFICATION', id });
-          
-          const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true
-          });
-          
-          Toast.fire({
-            icon: 'success',
-            title: 'Notifikasi berhasil dihapus'
-          });
-        }
+        });
 
         bell.addEventListener('click', () => {
           panel.classList.toggle('hidden');
-          if (!panel.classList.contains('hidden')) {
-            panel.classList.add('fadeIn');
-          }
         });
-        
         closeBtn.addEventListener('click', () => panel.classList.add('hidden'));
-        
-        markAllBtn.addEventListener('click', () => {
-          if (unreadCount > 0) {
-            navigator.serviceWorker.controller.postMessage({ type:'MARK_ALL_AS_READ' });
-            
-            Swal.fire({
-              title: 'Semua Dibaca',
-              text: 'Semua notifikasi telah ditandai sebagai dibaca',
-              icon: 'success',
-              confirmButtonColor: '#0dcaf0',
-              timer: 2000,
-              timerProgressBar: true
-            });
-          } else {
-            Swal.fire({
-              title: 'Info',
-              text: 'Tidak ada notifikasi yang belum dibaca',
-              icon: 'info',
-              confirmButtonColor: '#0dcaf0',
-              timer: 2000,
-              timerProgressBar: true
-            });
+
+        // Klik di luar panel notifikasi untuk menutupnya
+        document.addEventListener('click', (event) => {
+          const isClickInsidePanel = panel.contains(event.target);
+          const isClickOnBell = bell.contains(event.target);
+          if (!isClickInsidePanel && !isClickOnBell && !panel.classList.contains('hidden')) {
+              panel.classList.add('hidden');
           }
         });
+
 
         // Service Worker registration & messaging
         if ('serviceWorker' in navigator) {
           window.addEventListener('load', async () => {
             try {
-              const reg = await navigator.serviceWorker.register('/sw.js');
-              console.log('Service worker berhasil didaftarkan:', reg);
-              
-              const authData = JSON.parse(localStorage.getItem('storyapp_auth'));
-              if (reg.active && authData?.token) {
-                reg.active.postMessage({ type:'AUTH_TOKEN', token:authData.token });
-                reg.active.postMessage({ type:'GET_DUMMY_NOTIFICATIONS_STATUS' });
-                reg.active.postMessage('FLUSH_NOTIFICATIONS');
+              const registration = await navigator.serviceWorker.register('./sw.js', { scope: '/' });
+              console.log('Service Worker Registered:', registration.scope);
+
+              const sendInitialDataToSW = (swInstance) => {
+                  if (!swInstance) {
+                      console.warn('SW instance not available for initial data.');
+                      return;
+                  }
+                  console.log('Sending initial data to SW.');
+                  const authData = JSON.parse(localStorage.getItem('storyapp_auth'));
+                  if (authData?.token) {
+                      swInstance.postMessage({ type: 'AUTH_TOKEN', token: authData.token });
+                  }
+                  // Beri sedikit jeda setelah AUTH_TOKEN, lalu minta notifikasi
+                  setTimeout(() => {
+                      swInstance.postMessage({ type: 'GET_ALL_NOTIFICATIONS' });
+                      console.log('GET_ALL_NOTIFICATIONS message sent to SW.');
+                  }, 250); 
+              };
+
+              if (navigator.serviceWorker.controller) {
+                  console.log('SW is controlling. Sending initial data.');
+                  sendInitialDataToSW(navigator.serviceWorker.controller);
+              } else {
+                  // Menunggu SW baru untuk aktif dan mengontrol
+                  registration.addEventListener('updatefound', () => {
+                      const newWorker = registration.installing;
+                      newWorker.addEventListener('statechange', () => {
+                          if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
+                              console.log('New SW activated and controlling. Sending initial data.');
+                              sendInitialDataToSW(navigator.serviceWorker.controller);
+                          }
+                      });
+                  });
+                  // Jika SW baru diinstall dan langsung aktif (karena clients.claim())
+                  if (registration.active && !navigator.serviceWorker.controller) {
+                      // Ini bisa terjadi jika halaman dimuat sangat cepat setelah SW claim.
+                      // Menunggu controllerchange adalah pendekatan yang lebih aman.
+                      navigator.serviceWorker.addEventListener('controllerchange', () => {
+                          if(navigator.serviceWorker.controller) {
+                            console.log('SW now controlling after controllerchange. Sending initial data.');
+                            sendInitialDataToSW(navigator.serviceWorker.controller);
+                          }
+                      }, { once: true }); // Hanya jalankan sekali
+                  } else if(registration.active) {
+                      // Jika sudah ada SW aktif tapi tidak mengontrol (jarang terjadi jika claim ada)
+                      // atau untuk kasus SW baru saja diaktifkan dari instalasi awal
+                      sendInitialDataToSW(registration.active);
+                  }
               }
               
               navigator.serviceWorker.addEventListener('message', ({ data }) => {
-                if (data.type==='PENDING_NOTIFICATIONS') {
-                  notifications = data.notifications;
+                console.log('Message from SW:', data.type, data);
+                if (data.type === 'ALL_NOTIFICATIONS') {
+                  notifications = data.notifications || []; // Pastikan array
                   unreadCount = notifications.filter(n => !n.read).length;
-                } else if (data.type==='NEW_NOTIFICATION') {
+                } else if (data.type === 'NEW_NOTIFICATION') {
                   notifications.unshift(data.notification);
-                  if (!data.notification.read) {
-                    unreadCount++;
-                    // Tampilkan SweetAlert untuk notifikasi baru
-                    const Toast = Swal.mixin({
-                      toast: true,
-                      position: 'top-end',
-                      showConfirmButton: false,
-                      timer: 5000,
-                      timerProgressBar: true
-                    });
-                    
-                    Toast.fire({
-                      icon: 'info',
-                      title: data.notification.title,
-                      text: data.notification.options.body
-                    });
-                  }
-                } else if (data.type==='NOTIFICATION_DELETED') {
-                  const deletedItem = notifications.find(n => n.id === data.id);
-                  if (deletedItem && !deletedItem.read) {
-                    unreadCount = Math.max(0, unreadCount - 1);
-                  }
-                  notifications = notifications.filter(n => n.id!==data.id);
-                } else if (data.type==='NOTIFICATIONS_MARKED_READ') {
-                  notifications.forEach(n => n.read = true);
-                  unreadCount = 0;
-                } else if (data.type==='DUMMY_NOTIFICATIONS_STATUS') {
-                  // ignore
+                  if (!data.notification.read) unreadCount++;
+                  
+                  Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 5000, timerProgressBar: true, didOpen: (toast) => { toast.addEventListener('mouseenter', Swal.stopTimer); toast.addEventListener('mouseleave', Swal.resumeTimer); }})
+                    .fire({ icon: 'info', title: `Notifikasi Baru: ${data.notification.title || ''}`, text: data.notification.options?.body || '' });
                 }
-                updateBadge(); 
+                // Setelah operasi di SW, ia akan mengirim ALL_NOTIFICATIONS. Jadi tidak perlu penanganan spesifik
+                // untuk NOTIFICATION_UPDATED, NOTIFICATION_REMOVED dll. jika SW selalu mengirim daftar lengkap.
+                // Jika SW hanya mengirim ID yang diubah, Anda perlu logika di sini.
+                // Berdasarkan sw.js yang direvisi, ALL_NOTIFICATIONS akan sering dikirim.
+
+                notifications.sort((a, b) => b.timestamp - a.timestamp); // Selalu urutkan
+                updateBadge();
                 renderNotifications();
               });
-            } catch (error) {
-              console.error('Gagal mendaftarkan service worker:', error);
-              Swal.fire({
-                title: 'Error',
-                text: 'Gagal mendaftarkan service worker. Beberapa fitur mungkin tidak berfungsi dengan baik.',
-                icon: 'error',
-                confirmButtonColor: '#0dcaf0'
-              });
+
+            } catch (err) {
+              console.error('Service Worker registration failed:', err);
+              Swal.fire({ icon: 'error', title: 'Error Registrasi SW', text: `Gagal mendaftarkan Service Worker: ${err.message}` });
             }
           });
         } else {
-          console.log('Service Worker tidak didukung oleh browser ini');
-          Swal.fire({
-            title: 'Peringatan',
-            text: 'Browser Anda tidak mendukung Service Worker. Beberapa fitur mungkin tidak berfungsi dengan baik.',
-            icon: 'warning',
-            confirmButtonColor: '#0dcaf0'
-          });
+          Swal.fire({ icon: 'warning', title: 'Peringatan', text: 'Browser tidak mendukung Service Worker.' });
         }
 
-        // Menambahkan welcome alert ketika halaman pertama kali dimuat
+        // Welcome alert
         window.addEventListener('DOMContentLoaded', () => {
-          const visitedBefore = localStorage.getItem('visited_before');
-          if (!visitedBefore) {
+          if (!localStorage.getItem('visited_before_storyapp')) { // Gunakan key yang lebih spesifik
             setTimeout(() => {
-              Swal.fire({
-                title: 'Selamat Datang di StoryApp!',
-                text: 'Bagikan cerita dan pengalaman Anda dengan lokasi. Daftar atau masuk untuk mulai menggunakan aplikasi.',
-                icon: 'info',
-                confirmButtonColor: '#0dcaf0',
-                confirmButtonText: 'Mulai'
-              });
-              localStorage.setItem('visited_before', 'true');
+              Swal.fire({ title: 'Selamat Datang di StoryApp!', text: 'Bagikan cerita dan pengalaman lokasimu dengan dunia. Jelajahi, buat, dan terhubung!', icon: 'info', confirmButtonColor: 'var(--primary)' });
+              localStorage.setItem('visited_before_storyapp', 'true');
             }, 1000);
           }
+          updateNav(); // Panggil updateNav setelah DOM siap
         });
-
-        // Inisialisasi
-        updateNav();
       </script>
     </body>
   </html>
