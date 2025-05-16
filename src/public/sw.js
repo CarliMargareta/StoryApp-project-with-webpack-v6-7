@@ -11,87 +11,61 @@ const notificationStore = createStore('storyapp-notifications-db', 'notification
 const authDataStore = createStore('storyapp-auth-db', 'auth-data-store');
 
 const API_BASE_URL = 'https://story-api.dicoding.dev/v1'; // Pastikan ini URL API Anda
-const VAPID_PUBLIC_KEY = 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk'; // Ganti dengan VAPID public key Anda
+const VAPID_PUBLIC_KEY = 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk'; // VAPID public key Anda
 
 // Konfigurasi Workbox
 if (workbox) {
   console.log(`Workbox berhasil dimuat!`);
   workbox.setConfig({ debug: false }); // Set true untuk debugging di development
 
-  // Skip waiting dan claim clients agar SW baru segera aktif
   workbox.core.skipWaiting();
   workbox.core.clientsClaim();
 
-  // Precache aset inti aplikasi
   const PRECACHE_ASSETS = [
-    { url: '/', revision: 'app-shell-v1' }, // Revisi bisa diupdate saat ada perubahan besar
+    { url: '/', revision: 'app-shell-v1' },
     { url: '/index.html', revision: 'index-html-v1' },
     { url: '/manifest.json', revision: 'manifest-json-v1' },
     { url: '/favicon.png', revision: 'favicon-v1' },
     { url: 'images/logo.png', revision: 'logo-v1' },
     { url: 'images/icons/ios/192.png', revision: 'icon-192-v1'}
-    // Tambahkan aset penting lainnya seperti CSS utama, JS utama jika tidak di-load dari CDN
   ];
   workbox.precaching.precacheAndRoute(PRECACHE_ASSETS);
 
-  // Strategi caching untuk permintaan navigasi (HTML) - NetworkFirst
   workbox.routing.registerRoute(
     ({ request }) => request.mode === 'navigate',
     new workbox.strategies.NetworkFirst({
       cacheName: 'storyapp-pages-cache',
-      plugins: [
-        new workbox.cacheableResponse.CacheableResponsePlugin({
-          statuses: [200], // Cache response yang berhasil atau opaque
-        }),
-      ],
+      plugins: [ new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [200] }) ],
     })
   );
 
-  // Strategi caching untuk aset statis lokal (CSS, JS, gambar) - StaleWhileRevalidate
   workbox.routing.registerRoute(
     ({ request, url }) => request.destination === 'style' || request.destination === 'script' || request.destination === 'image' && url.origin === self.location.origin,
     new workbox.strategies.StaleWhileRevalidate({
       cacheName: 'storyapp-static-resources-cache',
-      plugins: [
-        new workbox.cacheableResponse.CacheableResponsePlugin({
-          statuses: [200],
-        }),
-      ],
+      plugins: [ new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [200] }) ],
     })
   );
 
-  // Strategi caching untuk aset dari CDN (FontAwesome, Bootstrap, Leaflet, SweetAlert2) - CacheFirst atau StaleWhileRevalidate
   workbox.routing.registerRoute(
     ({ url }) => ['https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com', 'https://unpkg.com', 'https://fonts.googleapis.com', 'https://fonts.gstatic.com'].includes(url.origin),
-    new workbox.strategies.CacheFirst({ // CacheFirst lebih cocok untuk aset yang jarang berubah dari CDN
+    new workbox.strategies.CacheFirst({
       cacheName: 'storyapp-cdn-cache',
       plugins: [
-        new workbox.cacheableResponse.CacheableResponsePlugin({
-          statuses: [200],
-        }),
-        new workbox.expiration.ExpirationPlugin({
-          maxEntries: 50, // Batasi jumlah entri
-          maxAgeSeconds: 30 * 24 * 60 * 60, // Cache selama 30 hari
-        }),
+        new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [200] }),
+        new workbox.expiration.ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60 }),
       ],
     })
   );
 
-  // Strategi caching untuk permintaan API (opsional, tergantung kebutuhan)
-  // Contoh: NetworkFirst untuk data API agar selalu coba ambil yang terbaru
   workbox.routing.registerRoute(
-    ({ url }) => url.href.startsWith(API_BASE_URL) && url.pathname.includes('/stories'), // Hanya untuk GET stories
+    ({ url }) => url.href.startsWith(API_BASE_URL) && url.pathname.includes('/stories'),
     new workbox.strategies.NetworkFirst({
       cacheName: 'storyapp-api-data-cache',
-      networkTimeoutSeconds: 5, // Timeout jika jaringan lambat, lalu fallback ke cache
+      networkTimeoutSeconds: 5,
       plugins: [
-        new workbox.cacheableResponse.CacheableResponsePlugin({
-          statuses: [200], // Hanya cache response sukses dari API
-        }),
-        new workbox.expiration.ExpirationPlugin({
-          maxEntries: 20,
-          maxAgeSeconds: 1 * 24 * 60 * 60, // Cache data API selama 1 hari
-        }),
+        new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [200] }),
+        new workbox.expiration.ExpirationPlugin({ maxEntries: 20, maxAgeSeconds: 1 * 24 * 60 * 60 }),
       ],
     })
   );
@@ -100,9 +74,6 @@ if (workbox) {
   console.error(`Workbox gagal dimuat! Fitur caching mungkin tidak berfungsi.`);
 }
 
-// --- Fungsi Helper ---
-
-// Mengubah VAPID key dari base64 ke Uint8Array
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -110,20 +81,17 @@ function urlBase64ToUint8Array(base64String) {
   return Uint8Array.from(rawData, char => char.charCodeAt(0));
 }
 
-// Mengambil token otentikasi dari IndexedDB
 async function getAuthToken() {
   const authObject = await get('authToken', authDataStore);
   return authObject ? authObject.token : null;
 }
 
-// Mengirim pesan ke semua client yang terkontrol
 async function notifyAllClients(type, payload) {
-  console.log(`SW: Notifying clients - Type: ${type}`, payload);
+  console.log(`SW: Notifying clients - Type: ${type}`, payload ? JSON.stringify(payload).substring(0, 200) + '...' : ''); // Log payload singkat
   const clientsArr = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
   clientsArr.forEach(client => client.postMessage({ type, ...payload }));
 }
 
-// Mengirim semua notifikasi yang tersimpan ke client
 async function sendAllNotificationsToClients() {
   try {
     const notificationKeys = await keys(notificationStore);
@@ -131,36 +99,31 @@ async function sendAllNotificationsToClients() {
     for (const key of notificationKeys) {
       const notification = await get(key, notificationStore);
       if (notification) {
-        // Pastikan formatnya konsisten dengan yang diharapkan client
         allNotifications.push({
-          id: key, // ID adalah key dari DB
+          id: key,
           title: notification.title,
-          options: notification.options, // options sudah berisi body, icon, data, dll.
+          options: notification.options,
           timestamp: notification.timestamp,
           read: notification.read,
         });
       }
     }
-    allNotifications.sort((a, b) => b.timestamp - a.timestamp); // Terbaru dulu
+    allNotifications.sort((a, b) => b.timestamp - a.timestamp);
     notifyAllClients('ALL_NOTIFICATIONS', { notifications: allNotifications });
   } catch (error) {
     console.error('SW: Error sending all notifications to clients:', error);
   }
 }
 
-// --- Event Listener Service Worker ---
-
 self.addEventListener('install', (event) => {
   console.log('SW: Install event');
-  // SW akan skip waiting di 'activate' jika workbox.core.skipWaiting() dipanggil
 });
 
 self.addEventListener('activate', (event) => {
   console.log('SW: Activate event');
-  event.waitUntil(self.clients.claim()); // Klaim kontrol atas client yang terbuka
+  event.waitUntil(self.clients.claim());
 });
 
-// Menerima pesan dari client
 self.addEventListener('message', async (event) => {
   if (!event.data || !event.data.type) return;
   const { type, token, id, endpoint } = event.data;
@@ -171,11 +134,11 @@ self.addEventListener('message', async (event) => {
       if (token) {
         await set('authToken', { token }, authDataStore);
         console.log('SW: Auth token stored. Attempting to subscribe for push notifications.');
-        await subscribeToPushNotifications(); // Coba subscribe setelah token disimpan
+        await subscribeToPushNotifications();
       }
       break;
-    case 'UNSUBSCRIBE_PUSH': // Jika client meminta unsubscribe
-      await unsubscribeFromPushNotifications(endpoint); // Anda mungkin perlu endpoint dari client
+    case 'UNSUBSCRIBE_PUSH':
+      await unsubscribeFromPushNotifications(endpoint);
       break;
     case 'GET_ALL_NOTIFICATIONS':
       await sendAllNotificationsToClients();
@@ -186,7 +149,7 @@ self.addEventListener('message', async (event) => {
         if (notification && !notification.read) {
           notification.read = true;
           await set(id, notification, notificationStore);
-          await sendAllNotificationsToClients(); // Kirim update ke semua client
+          await sendAllNotificationsToClients();
         }
       }
       break;
@@ -218,8 +181,6 @@ self.addEventListener('message', async (event) => {
   }
 });
 
-// --- Push Notification Handling ---
-
 async function subscribeToPushNotifications() {
   try {
     const token = await getAuthToken();
@@ -227,15 +188,11 @@ async function subscribeToPushNotifications() {
       console.log('SW: No auth token, cannot subscribe to push.');
       return;
     }
-
     const existingSubscription = await self.registration.pushManager.getSubscription();
     if (existingSubscription) {
       console.log('SW: User is already subscribed.', existingSubscription);
-      // Anda bisa mengirim ulang subscription ke server jika perlu validasi ulang
-      // await sendSubscriptionToServer(existingSubscription, token, 'update');
       return;
     }
-
     const subscription = await self.registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
@@ -246,7 +203,6 @@ async function subscribeToPushNotifications() {
     console.error('SW: Failed to subscribe the user: ', error);
     if (error.name === 'NotAllowedError') {
         console.warn('SW: Push permission denied by user.');
-        // Beri tahu client agar bisa menampilkan UI yang sesuai
         notifyAllClients('PUSH_PERMISSION_DENIED');
     }
   }
@@ -255,15 +211,12 @@ async function subscribeToPushNotifications() {
 async function unsubscribeFromPushNotifications(currentEndpoint) {
   try {
     const token = await getAuthToken();
-    // Tidak perlu token untuk unsubscribe dari PushManager, tapi mungkin perlu untuk server
-    
     const subscription = await self.registration.pushManager.getSubscription();
     if (subscription) {
       const endpointToDelete = subscription.endpoint;
       const success = await subscription.unsubscribe();
       if (success) {
         console.log('SW: User unsubscribed successfully.');
-        // Beritahu server untuk menghapus subscription
         if (token && endpointToDelete) {
           await sendSubscriptionToServer({ endpoint: endpointToDelete }, token, 'unsubscribe');
         }
@@ -272,9 +225,8 @@ async function unsubscribeFromPushNotifications(currentEndpoint) {
       }
     } else {
       console.log('SW: No active subscription to unsubscribe.');
-      // Jika ada endpoint dari client, coba hapus dari server
       if (token && currentEndpoint) {
-          await sendSubscriptionToServer({ endpoint: currentEndpoint }, token, 'unsubscribe');
+        await sendSubscriptionToServer({ endpoint: currentEndpoint }, token, 'unsubscribe');
       }
     }
   } catch (error) {
@@ -283,18 +235,32 @@ async function unsubscribeFromPushNotifications(currentEndpoint) {
 }
 
 async function sendSubscriptionToServer(subscription, authToken, action = 'subscribe') {
-  const endpointUrl = `${API_BASE_URL}/notifications/${action}`; // Sesuaikan endpoint API Anda
+  // Sesuai dokumentasi API Anda, endpoint untuk subscribe dan unsubscribe berbeda method tapi URL sama
+  // Namun, di kode Anda sebelumnya, Anda menggunakan /notifications/subscribe dan /notifications/unsubscribe
+  // Saya akan mengikuti logika API yang /notifications/subscribe untuk POST dan DELETE
+  const endpointUrl = `${API_BASE_URL}/notifications/subscribe`;
   let bodyPayload;
 
   if (action === 'subscribe') {
       const p256dh = btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('p256dh'))));
-      const auth = btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth'))));
+      const authKey = btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth')))); // "auth" adalah nama field di PushSubscription
       bodyPayload = {
         endpoint: subscription.endpoint,
-        keys: { p256dh, auth },
+        // Sesuai dokumentasi API, server mengharapkan "keys" sebagai objek dengan "p256dh" dan "auth"
+        // Namun request body subscribe di API Anda adalah: endpoint, keys, p256dh, auth. Ini sedikit ambigu.
+        // Saya akan mengikuti struktur yang paling umum dimana p256dh dan auth ada di dalam objek keys.
+        // Jika server Anda mengharapkannya di root, sesuaikan.
+        // Berdasarkan contoh response subscribe, sepertinya keys adalah string, bukan objek. Mari sesuaikan.
+        // JUGA, API docs Anda untuk subscribe meminta: endpoint, keys, p256dh, auth.
+        // Ini berarti "keys" mungkin field lain, atau p256dh dan auth adalah top-level.
+        // Mari kita coba kirim p256dh dan auth sebagai top-level sesuai API docs.
+        p256dh: p256dh, // Mengikuti API docs
+        auth: authKey    // Mengikuti API docs
+        // "keys" field di API docs tidak jelas apa isinya, mungkin ini adalah nama field yang salah di docs
+        // atau merujuk ke keseluruhan objek subscription keys. Untuk sekarang kita abaikan field "keys" ini.
       };
   } else if (action === 'unsubscribe') {
-      bodyPayload = { endpoint: subscription.endpoint }; // Hanya perlu endpoint untuk unsubscribe
+      bodyPayload = { endpoint: subscription.endpoint }; // Sesuai API docs untuk unsubscribe
   } else {
       console.warn('SW: Invalid action for sendSubscriptionToServer');
       return;
@@ -302,7 +268,7 @@ async function sendSubscriptionToServer(subscription, authToken, action = 'subsc
   
   try {
     const response = await fetch(endpointUrl, {
-      method: action === 'unsubscribe' ? 'DELETE' : 'POST', // DELETE untuk unsubscribe, POST untuk subscribe
+      method: action === 'subscribe' ? 'POST' : 'DELETE', // Sesuai API docs
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${authToken}`,
@@ -313,8 +279,8 @@ async function sendSubscriptionToServer(subscription, authToken, action = 'subsc
     if (response.ok) {
       console.log(`SW: Subscription ${action}d successfully on server.`);
     } else {
-      const errorData = await response.json().catch(() => ({ message: 'Unknown server error' }));
-      console.error(`SW: Failed to ${action} subscription on server. Status: ${response.status}`, errorData.message);
+      const errorText = await response.text();
+      console.error(`SW: Failed to ${action} subscription on server. Status: ${response.status}`, errorText);
     }
   } catch (error) {
     console.error(`SW: Error sending subscription to server (${action}):`, error);
@@ -322,113 +288,174 @@ async function sendSubscriptionToServer(subscription, authToken, action = 'subsc
 }
 
 
-// Menerima push event dari server
+// --- BAGIAN PENTING: Event listener untuk 'push' ---
 self.addEventListener('push', (event) => {
   console.log('SW: Push event received.');
+  // Default data jika tidak ada payload atau parsing gagal
+  const defaultNotificationId = `notif-id-default-${Date.now()}`;
   let pushData = {
-    title: 'StoryApp Notification',
+    title: 'StoryApp Notification', // Default title
     options: {
-      body: 'Anda memiliki notifikasi baru!',
-      icon: '/favicon.png', // Ikon default
-      badge: 'images/icons/ios/72.png', // Ikon untuk status bar Android
-      tag: `storyapp-notif-${Date.now()}`, // Tag unik agar notifikasi bisa di-update/replace
-      data: { // Data tambahan, misal URL untuk dibuka saat klik
-        url: '/', // URL default
-        idForDB: `notif-id-${Date.now()}`, // ID unik untuk disimpan di DB
+      body: 'Anda memiliki notifikasi baru!', // Default body
+      icon: '/favicon.png',
+      badge: 'images/icons/ios/72.png',
+      tag: `storyapp-notif-${Date.now()}`, // Tag untuk notifikasi sistem (bisa di-update)
+      data: {
+        url: '/', // URL default jika notifikasi diklik
+        idForDB: defaultNotificationId // ID unik default untuk IndexedDB
       },
-      renotify: true, // Getarkan/bunyikan lagi jika notifikasi dengan tag sama di-update
-      actions: [ // Contoh action button
-        // { action: 'explore', title: 'Jelajahi', icon: 'images/icons/actions/explore.png' },
-        // { action: 'close', title: 'Tutup', icon: 'images/icons/actions/close.png' },
-      ]
+      renotify: true,
+      actions: []
     }
   };
 
+  console.log('SW: Initial pushData.options.data:', JSON.stringify(pushData.options.data));
+
   if (event.data) {
     try {
-      const parsedData = event.data.json();
-      pushData.title = parsedData.title || pushData.title;
-      // Gabungkan options dari push dengan default,utamakan dari push
-      pushData.options = { ...pushData.options, ...parsedData.options }; 
-      // Pastikan data.idForDB selalu unik jika tidak disediakan
-      if (!pushData.options.data.idForDB && parsedData.options?.data?.id) {
-        pushData.options.data.idForDB = parsedData.options.data.id; // Gunakan ID dari server jika ada
-      } else if (!pushData.options.data.idForDB) {
-        pushData.options.data.idForDB = `notif-id-${Date.now()}`;
+      const parsedDataFromServer = event.data.json();
+      console.log('SW: Parsed push data from server:', JSON.stringify(parsedDataFromServer));
+
+      // Update title dari server jika ada
+      pushData.title = parsedDataFromServer.title || pushData.title;
+
+      // Simpan referensi ke data default sebelum di-override
+      const originalDefaultData = { ...pushData.options.data };
+
+      // Gabungkan options dari server. Hati-hati, ini bisa menimpa seluruh `pushData.options.data`
+      // jika `parsedDataFromServer.options` tidak memiliki struktur `data` di dalamnya.
+      if (parsedDataFromServer.options) {
+        pushData.options = { ...pushData.options, ...parsedDataFromServer.options };
       }
-       // Pastikan ada URL
-      pushData.options.data.url = parsedData.options?.data?.url || '/';
+      
+      // Pastikan `pushData.options.data` adalah objek setelah penggabungan.
+      // Jika `parsedDataFromServer.options` tidak punya field `data`, maka `pushData.options.data` bisa jadi undefined.
+      if (typeof pushData.options.data !== 'object' || pushData.options.data === null) {
+        console.warn('SW: pushData.options.data is not an object after merging with server options. Resetting to original default data.');
+        pushData.options.data = originalDefaultData; // Kembalikan ke struktur data default
+      } else {
+        // Jika server mengirim options.data, pastikan field penting kita (idForDB, url) terjaga atau diupdate.
+        // Berdasarkan API docs, server TIDAK mengirim id. Jadi kita akan selalu pakai ID default yang kita generate.
+        // Jika server mengirim URL, kita gunakan itu.
+        pushData.options.data = {
+          ...originalDefaultData, // Ambil default (terutama idForDB)
+          ...pushData.options.data, // Timpa dengan data dari server jika ada (misal, server kirim URL atau field lain)
+          idForDB: originalDefaultData.idForDB // PAKSA penggunaan ID yang kita generate, karena server tidak mengirimnya.
+        };
+      }
+      
+      // Khusus untuk URL, jika server mengirimnya di dalam `parsedDataFromServer.options.data.url`
+      if (parsedDataFromServer.options && parsedDataFromServer.options.data && parsedDataFromServer.options.data.url) {
+        pushData.options.data.url = parsedDataFromServer.options.data.url;
+      } else if (!pushData.options.data.url) { // Jika setelah merge, URL tidak ada, gunakan default.
+        pushData.options.data.url = originalDefaultData.url;
+      }
+
+
+      console.log('SW: Final pushData.options.data after processing server data:', JSON.stringify(pushData.options.data));
 
     } catch (e) {
-      console.error('SW: Error parsing push data JSON. Using default.', e);
-      // Jika parsing gagal, pushData default akan digunakan
+      console.error('SW: Error parsing push data JSON from server. Using default data structure. Error:', e);
+      // Jika parsing gagal, pushData sudah memiliki struktur default termasuk idForDB
+      console.log('SW: Using default pushData.options.data due to parse error:', JSON.stringify(pushData.options.data));
     }
+  } else {
+    console.log('SW: No event.data in push event. Using default data structure.');
+    // pushData sudah memiliki idForDB default
+    console.log('SW: Using default pushData.options.data as no event.data received:', JSON.stringify(pushData.options.data));
   }
 
-  // Data notifikasi untuk disimpan di IndexedDB
+  // Data final yang akan disimpan ke IndexedDB
   const notificationToStore = {
-    id: pushData.options.data.idForDB, // Gunakan ID unik ini sebagai key
+    id: pushData.options.data.idForDB, // Ini akan menjadi KEY di IndexedDB
     title: pushData.title,
-    options: pushData.options, // options sudah termasuk body, icon, data, dll.
+    options: pushData.options, // Seluruh objek options, termasuk options.data di dalamnya
     timestamp: Date.now(),
     read: false,
   };
 
+  console.log('SW: Attempting to store notification in IndexedDB. Key:', notificationToStore.id, 'Full object:', JSON.stringify(notificationToStore, null, 2));
+
+  // Validasi PENTING: Pastikan ID untuk IndexedDB adalah string yang valid dan tidak kosong
+  if (!notificationToStore.id || typeof notificationToStore.id !== 'string' || notificationToStore.id.trim() === '') {
+    console.error('SW: CRITICAL - notificationToStore.id (key for IndexedDB) is invalid or empty. Current value:', notificationToStore.id);
+    const fallbackId = `fallback-notif-id-${Date.now()}`; // Buat ID fallback jika ID utama bermasalah
+    console.warn(`SW: Using fallback ID for IndexedDB: ${fallbackId}`);
+    notificationToStore.id = fallbackId;
+    // Update juga idForDB di dalam options.data untuk konsistensi
+    if (pushData.options.data) {
+        pushData.options.data.idForDB = fallbackId;
+    } else { // Jika options.data tidak ada (seharusnya tidak terjadi dengan logika di atas)
+        pushData.options.data = { idForDB: fallbackId, url: '/' };
+    }
+    // Pastikan perubahan ini tercermin di notificationToStore.options.data juga
+     notificationToStore.options.data.idForDB = fallbackId;
+
+  }
+
   const showNotificationPromise = self.registration.showNotification(pushData.title, pushData.options);
+
   const storeNotificationPromise = set(notificationToStore.id, notificationToStore, notificationStore)
     .then(() => {
-      // Kirim notifikasi baru ke client yang aktif
+      console.log('SW: Notification stored successfully in IndexedDB! Key:', notificationToStore.id);
       notifyAllClients('NEW_NOTIFICATION', { notification: notificationToStore });
+    })
+    .catch(error => {
+      // Ini adalah logging error yang sangat penting
+      console.error('SW: FAILED to store notification in IndexedDB. Key tried:', notificationToStore.id, 'Error:', error);
     });
 
   event.waitUntil(Promise.all([showNotificationPromise, storeNotificationPromise]));
 });
+// --- AKHIR BAGIAN PENTING ---
 
 
-// Ketika notifikasi diklik oleh pengguna
 self.addEventListener('notificationclick', (event) => {
   const clickedNotification = event.notification;
-  const action = event.action; // Jika ada action button yang diklik
+  const action = event.action;
 
-  clickedNotification.close(); // Selalu tutup notifikasi setelah diklik
+  clickedNotification.close();
 
   console.log('SW: Notification clicked:', clickedNotification);
   console.log('SW: Action clicked:', action);
 
-  const notificationIdInDB = clickedNotification.data?.idForDB;
+  const notificationIdInDB = clickedNotification.data?.idForDB; // Pastikan ini adalah ID yang sama dengan yang disimpan
   const urlToOpen = clickedNotification.data?.url || '/';
 
-  // Tandai sebagai dibaca di DB dan update client
+  console.log(`SW: Clicked notification's idForDB: ${notificationIdInDB}, URL to open: ${urlToOpen}`);
+
   const markReadAndUpdatePromise = notificationIdInDB ? (async () => {
-      const notification = await get(notificationIdInDB, notificationStore);
-      if (notification) {
+      console.log(`SW: Attempting to mark as read notification with DB key: ${notificationIdInDB}`);
+      try {
+        const notification = await get(notificationIdInDB, notificationStore);
+        if (notification) {
+          console.log(`SW: Found notification in DB for key ${notificationIdInDB}. Marking as read.`);
           notification.read = true;
           await set(notificationIdInDB, notification, notificationStore);
-          await sendAllNotificationsToClients(); // Update semua client
+          await sendAllNotificationsToClients();
+        } else {
+          console.warn(`SW: Notification with DB key ${notificationIdInDB} not found in DB for marking as read.`);
+        }
+      } catch (dbError) {
+        console.error(`SW: Error accessing DB for key ${notificationIdInDB} to mark as read:`, dbError);
       }
   })() : Promise.resolve();
 
 
-  // Penanganan action button (jika ada)
   if (action === 'close') {
-    // Tidak melakukan apa-apa, notifikasi sudah ditutup
+    // No specific action needed
   } else if (action === 'explore') {
-    // Buka URL spesifik untuk explore
-    event.waitUntil(Promise.all([markReadAndUpdatePromise, self.clients.openWindow('/explore')])); // Contoh URL
+    event.waitUntil(Promise.all([markReadAndUpdatePromise, self.clients.openWindow('/explore')]));
   } else {
-    // Default action: buka URL dari data notifikasi
     event.waitUntil(
       Promise.all([
         markReadAndUpdatePromise,
         self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-          // Cek apakah ada window yang sudah terbuka dengan URL yang sama
           for (const client of windowClients) {
-            // Perlu perbandingan URL yang lebih cermat jika ada query params atau hash
             if (new URL(client.url, self.location.origin).pathname === new URL(urlToOpen, self.location.origin).pathname && 'focus' in client) {
               return client.focus();
             }
           }
-          // Jika tidak ada, buka window baru
           return self.clients.openWindow(urlToOpen);
         })
       ])
