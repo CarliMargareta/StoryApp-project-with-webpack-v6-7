@@ -276,7 +276,7 @@ footer a.text-dark:hover {
   list-style: none;
   margin: 0;
   padding: 0;
-  max-height: 350px;
+  max-height: 150px;
   overflow-y: auto;
 }
 .notification-item {
