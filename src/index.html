@@ -1,683 +1,647 @@
-<!DOCTYPE html>
-<html lang="id"> <head>
-    <meta charset="UTF-8" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <meta name="description" content="StoryApp - Bagikan cerita Anda dengan lokasi" /> <link rel="manifest" href="manifest.json" /> <meta name="theme-color" content="#0dcaf0" /> <meta name="apple-mobile-web-app-capable" content="yes" /> 
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="StoryApp" /> <link rel="apple-touch-icon" href="images/icons/ios/192.png" /> <link rel="shortcut icon" href="favicon.png" /> <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-      crossorigin="anonymous"
-    />
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-    
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" />
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+  <!DOCTYPE html>
+  <html lang="id">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <meta name="description" content="StoryApp - Bagikan cerita Anda dengan lokasi" />
+      <link rel="manifest" href="manifest.json" />
+      <meta name="theme-color" content="#0dcaf0" />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      <meta name="apple-mobile-web-app-title" content="StoryApp" />
+      <link rel="apple-touch-icon" href="images/icons/ios/192.png" />
+      <link rel="shortcut icon" href="favicon.png" />
 
-    <title>StoryApp</title> <style>
-      /* Ini variabel warna global yang saya pakai di seluruh aplikasi, biar gampang ganti tema */
-      :root {
-        --primary: #0dcaf0; /* Warna utama saya */
-        --primary-dark: #0bacce; /* Versi lebih gelap dari warna utama */
-        --secondary: #6c757d; /* Warna sekunder */
-        --accent: #fd7e14; /* Warna aksen buat tombol penting */
-        --background: #f8f9fa; /* Warna latar belakang halaman */
-        --text: #212529; /* Warna teks utama */
-        --light-text: #6c757d; /* Warna teks yang lebih terang/abu-abu */
-        --border: #dee2e6; /* Warna border standar */
-        --notification-bg: #f0f7ff; /* Latar belakang item notifikasi */
-        --notification-unread: #e1f0ff; /* Latar belakang notifikasi yang belum dibaca */
-        --danger: #dc3545; /* Warna buat error atau aksi berbahaya */
-        --success: #198754; /* Warna buat sukses */
-      }
-      body {
-        font-family: 'Poppins', sans-serif; /* Pakai font Poppins yang udah saya impor */
-        background-color: var(--background); /* Set warna latar body */
-        color: var(--text); /* Set warna teks default body */
-        position: relative; /* Perlu buat beberapa elemen absolute */
-        min-height: 100vh; /* Biar footer nempel di bawah kalau kontennya pendek */
-        display: flex; /* Pakai flexbox buat layout utama (header, main, footer) */
-        flex-direction: column; /* Susun elemen flex secara vertikal */
-      }
-      .hidden { display: none !important; } /* Class helper buat nyembunyiin elemen */
+      <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous"
+      />
       
-      /* Ini buat skip link, penting buat aksesibilitas */
-      .skip-link {
-        position: absolute; top: -40px; left: 0; /* Sembunyiin di luar layar awalnya */
-        background: var(--primary-dark); color: white;
-        padding: 8px; z-index: 100; text-decoration: none;
-        transition: top 0.3s; /* Animasi halus pas muncul */
-      }
-      .skip-link:focus { top: 0; } /* Munculin pas di-fokus (pakai tab) */
-
-      /* Styling buat Navbar saya */
-      .navbar {
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Kasih bayangan dikit biar elegan */
-        padding: 12px 0; /* Padding atas-bawah navbar */
-      }
-      .navbar-brand {
-        font-weight: 600; /* Biar tebel nama aplikasinya */
-        display: flex; /* Biar logo dan teks sejajar */
-        align-items: center; /* Tengahin vertikal logo dan teks */
-      }
-      .navbar-brand img.logo {
-        height: 32px; /* Ukuran logo saya */
-        margin-right: 10px; /* Jarak logo ke teks */
-      }
-      .nav-link {
-        font-weight: 500; /* Berat font buat link navigasi */
-        padding: 8px 16px !important; /* Padding link, !important biar gak ketimpa Bootstrap */
-        border-radius: 4px; /* Sudut agak melengkung */
-        transition: all 0.3s ease; /* Animasi halus pas hover */
-      }
-      .nav-link:hover {
-        background-color: rgba(255, 255, 255, 0.2); /* Efek hover di link */
-      }
-      /* Tombol utama di navbar (misal "Daftar") */
-      .btn-primary {
-        background-color: var(--accent); /* Pakai warna aksen */
-        border-color: var(--accent);
-        font-weight: 500;
-        padding: 8px 20px;
-        border-radius: 4px;
-        transition: all 0.3s ease;
-      }
-      .btn-primary:hover {
-        background-color: #e67211; /* Warna aksen lebih gelap pas hover */
-        border-color: #e67211;
-        transform: translateY(-2px); /* Efek naik dikit pas hover */
-      }
-      /* Tombol outline di navbar (misal "Keluar") */
-      .btn-outline-light {
-        font-weight: 500;
-        padding: 8px 20px;
-        border-radius: 4px;
-        transition: all 0.3s ease;
-      }
-      .btn-outline-light:hover {
-        transform: translateY(-2px); /* Efek naik dikit juga */
-      }
-
-      /* Styling buat sistem notifikasi saya */
-      .notification-bell { /* Tombol lonceng notifikasi */
-        position: fixed; top: 80px; right: 30px; /* Posisi tetap di kanan atas */
-        background-color: var(--primary); color: white;
-        border: none; border-radius: 50%; width: 48px; height: 48px; /* Bunder sempurna */
-        display: flex; align-items: center; justify-content: center; /* Ikon pas di tengah */
-        cursor: pointer; font-size: 22px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); /* Bayangan biar nonjol */
-        z-index: 1050; /* Biar di atas elemen lain */
-        transition: transform 0.3s ease, background-color 0.3s ease; /* Animasi hover */
-      }
-      .notification-bell:hover {
-        transform: scale(1.1); background-color: var(--primary-dark); /* Membesar dan ganti warna pas hover */
-      }
-      .notification-badge { /* Angka di lonceng notifikasi */
-        position: absolute; top: -5px; right: -5px; /* Nempel di pojok lonceng */
-        background-color: var(--danger); color: white; /* Warna merah biar keliatan penting */
-        border-radius: 50%; width: 22px; height: 22px; /* Bunder juga */
-        display: flex; align-items: center; justify-content: center; /* Angka pas di tengah */
-        font-size: 12px; font-weight: bold; border: 2px solid white; /* Biar angkanya jelas */
-      }
-      .notifications-panel { /* Panel yang muncul pas lonceng di-klik */
-        position: fixed; right: 30px; top: 140px; /* Di bawah lonceng */
-        width: 350px; max-height: 500px; /* Ukuran panelnya */
-        background-color: white; border-radius: 12px; /* Sudut melengkung, latar putih */
-        box-shadow: 0 5px 25px rgba(0,0,0,0.15); /* Bayangan lebih gede */
-        overflow: hidden; z-index: 1040; /* Di bawah lonceng tapi di atas konten lain */
-        transition: transform 0.3s ease, opacity 0.3s ease; transform-origin: top right; /* Animasi muncul/hilang */
-        opacity: 0; /* Awalnya transparan */
-        transform: scale(0.95); /* Awalnya sedikit kecil */
-      }
-      .notifications-panel:not(.hidden) { /* Pas panelnya muncul */
-        opacity: 1; /* Jadi keliatan */
-        transform: scale(1); /* Ukuran normal */
-      }
-      .notifications-header { /* Bagian atas panel notifikasi */
-        display: flex; justify-content: space-between; align-items: center; /* Judul dan tombol close sejajar */
-        padding: 16px 20px; background-color: var(--primary); color: white; /* Warna primer */
-      }
-      .notifications-title {
-        margin: 0; font-weight: 600; font-size: 1.1rem; /* Gaya judul "Notifikasi" */
-      }
-      .close-notifications { /* Tombol close 'X' di panel */
-        background: none; border: none; color: white; font-size: 24px;
-        cursor: pointer; transition: transform 0.2s ease;
-      }
-      .close-notifications:hover { transform: scale(1.2); } /* Efek hover tombol close */
-      .notifications-actions { /* Area buat tombol "Tandai Semua" dan "Hapus Semua" */
-        padding: 12px 20px; background-color: #f5f5f5; /* Latar agak abu-abu */
-        border-bottom: 1px solid var(--border); text-align: right; /* Tombol rata kanan */
-      }
-      .notifications-actions .btn { margin-left: 0.5rem; } /* Jarak antar tombol aksi */
-      .notifications-list { /* Daftar item notifikasi */
-        list-style: none; /* Gak pake buletan/angka */
-        margin: 0;
-        padding: 0;
-        max-height: 350px; /* Tinggi maksimum list, sisanya scroll. Saya sesuaikan tingginya biar pas. */
-        overflow-y: auto; /* Tambahkan scrollbar vertikal jika konten melebihi max-height */
-      }
-      .notification-item { /* Tiap item notifikasi */
-        padding: 16px 20px; border-bottom: 1px solid var(--border); /* Garis pemisah antar item */
-        position: relative; cursor: pointer; /* Bisa di-klik */
-        transition: background-color 0.2s ease; /* Efek hover */
-      }
-      .notification-item.unread { /* Kalau belum dibaca, bedain tampilannya */
-        background-color: var(--notification-unread); /* Latar agak beda */
-        border-left: 4px solid var(--primary); /* Garis biru di kiri */
-      }
-      .notification-item:hover {
-        background-color: #f9f9f9; /* Latar ganti pas hover */
-      }
-      .notification-item h4 { /* Judul notifikasi */
-        font-size: 1rem; font-weight: 600; margin-bottom: 5px; padding-right: 30px; /* Ruang buat tombol delete */
-      }
-      .notification-item p { /* Isi/deskripsi notifikasi */
-        font-size: 0.9rem; margin-bottom: 8px; color: var(--light-text);
-      }
-      .notification-item small { /* Waktu notifikasi */
-        font-size: 0.75rem; color: var(--light-text);
-      }
-      .notification-delete { /* Tombol hapus per item notifikasi */
-        position: absolute; top: 16px; right: 16px; /* Pojok kanan atas item */
-        background: none; border: none; color: var(--danger); /* Warna merah */
-        font-size: 16px; cursor: pointer; opacity: 0.6; /* Awalnya agak transparan */
-        transition: opacity 0.2s ease, transform 0.2s ease; /* Efek hover */
-      }
-      .notification-delete:hover { opacity: 1; transform: scale(1.1); } /* Lebih jelas dan besar pas hover */
-      .no-notifications { /* Teks kalau gak ada notifikasi */
-        padding: 30px 20px; text-align: center;
-        color: var(--light-text); font-style: italic;
-      }
-
-      /* Styling Konten Utama saya */
-      .main-content { 
-        padding-top: 80px; /* Biar gak ketutupan navbar fixed-top */
-        flex: 1; /* Biar ngisi sisa ruang (penting buat footer nempel di bawah) */
-      }
-
-      /* Styling Footer saya */
-      footer {
-        background-color: var(--primary); color: white; /* Warna primer, teks putih */
-        padding: 25px 0; text-align: center; margin-top: 40px; /* Jarak dari konten di atasnya */
-      }
-      footer p { margin-bottom: 0; } /* Hilangin margin bawah paragraf di footer */
-
-      /* Kustomisasi tampilan Sweet Alert biar cocok sama tema saya */
-      .swal2-popup { font-family: 'Poppins', sans-serif; border-radius: 12px !important; } /* Font dan sudut popup */
-      .swal2-title { font-weight: 600 !important; } /* Judul alert lebih tebal */
-      .swal2-confirm { background-color: var(--primary) !important; border-radius: 4px !important; } /* Tombol konfirmasi pakai warna primer */
-      .swal2-cancel { border-radius: 4px !important; } /* Tombol batal juga */
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
       
-      /* Saya hapus @keyframes fadeIn karena transisinya udah dihandle langsung di .notifications-panel */
-    </style>
-  </head>
-  <body>
-    <a href="#main-content" class="skip-link">Lewati ke konten utama</a>
-    
-    <header>
-      <nav class="navbar navbar-expand-lg navbar-dark bg-info fixed-top"> <div class="container"> <a class="navbar-brand" href="#/"> <img src="images/logo.png" alt="Logo StoryApp" class="logo d-inline-block align-text-top" />
-            StoryApp
-          </a>
-          <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navigation-drawer"
-            aria-controls="navigation-drawer"
-            aria-expanded="false"
-            aria-label="Tombol menu" 
-          >
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navigation-drawer">
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0"> <li class="nav-item"><a class="nav-link" href="#/"><i class="fas fa-home me-1"></i> Beranda</a></li>
-              <li class="nav-item"><a class="nav-link" href="#/map"><i class="fas fa-map-location-dot me-1"></i> Tampilan Peta</a></li>
-              <li id="nav-add-story" class="nav-item hidden"><a class="nav-link" href="#/add"><i class="fas fa-plus-circle me-1"></i> Tambah Cerita</a></li>
-              <li class="nav-item"><a class="nav-link" href="#/about"><i class="fas fa-info-circle me-1"></i> Tentang</a></li>
-              <li id="nav-logout" class="nav-item hidden"><button id="logout-btn" class="btn btn-outline-light ms-lg-2"><i class="fas fa-sign-out-alt me-1"></i> Keluar</button></li>
-              <li id="nav-login" class="nav-item"><a class="nav-link" href="#/login"><i class="fas fa-sign-in-alt me-1"></i> Masuk</a></li>
-              <li id="nav-register" class="nav-item"><a class="btn btn-primary ms-lg-2" href="#/register"><i class="fas fa-user-plus me-1"></i> Daftar</a></li>
-            </ul>
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+      <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+      
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" />
+      
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+
+      <title>StoryApp</title>
+
+      <style>
+        :root {
+          --primary: #0dcaf0;
+          --primary-dark: #0bacce;
+          --secondary: #6c757d;
+          --accent: #fd7e14;
+          --background: #f8f9fa;
+          --text: #212529;
+          --light-text: #6c757d;
+          --border: #dee2e6;
+          --notification-bg: #f0f7ff;
+          --notification-unread: #e1f0ff;
+          --danger: #dc3545;
+          --success: #198754;
+        }
+        body {
+          font-family: 'Poppins', sans-serif;
+          background-color: var(--background);
+          color: var(--text);
+          position: relative;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+        .hidden { display: none !important; }
+        .skip-link {
+          position: absolute; top: -40px; left: 0;
+          background: var(--primary-dark); color: white;
+          padding: 8px; z-index: 100; text-decoration: none;
+          transition: top 0.3s;
+        }
+        .skip-link:focus { top: 0; }
+
+        /* Navbar styling */
+        .navbar {
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          padding: 12px 0;
+        }
+        .navbar-brand {
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+        }
+        .navbar-brand img.logo {
+          height: 32px;
+          margin-right: 10px;
+        }
+        .nav-link {
+          font-weight: 500;
+          padding: 8px 16px !important;
+          border-radius: 4px;
+          transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+          background-color: rgba(255, 255, 255, 0.2);
+        }
+        .btn-primary {
+          background-color: var(--accent);
+          border-color: var(--accent);
+          font-weight: 500;
+          padding: 8px 20px;
+          border-radius: 4px;
+          transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+          background-color: #e67211;
+          border-color: #e67211;
+          transform: translateY(-2px);
+        }
+        .btn-outline-light {
+          font-weight: 500;
+          padding: 8px 20px;
+          border-radius: 4px;
+          transition: all 0.3s ease;
+        }
+        .btn-outline-light:hover {
+          transform: translateY(-2px);
+        }
+
+        /* Notification styling */
+        .notification-bell {
+          position: fixed; top: 80px; right: 30px;
+          background-color: var(--primary); color: white;
+          border: none; border-radius: 50%; width: 48px; height: 48px;
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer; font-size: 22px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+          z-index: 1050; transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+        .notification-bell:hover {
+          transform: scale(1.1); background-color: var(--primary-dark);
+        }
+        .notification-badge {
+          position: absolute; top: -5px; right: -5px;
+          background-color: var(--danger); color: white;
+          border-radius: 50%; width: 22px; height: 22px;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 12px; font-weight: bold; border: 2px solid white;
+        }
+        .notifications-panel {
+          position: fixed; right: 30px; top: 140px;
+          width: 350px; max-height: 500px;
+          background-color: white; border-radius: 12px;
+          box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+          overflow: hidden; z-index: 1040;
+          transition: transform 0.3s ease, opacity 0.3s ease; transform-origin: top right;
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        .notifications-panel:not(.hidden) {
+          opacity: 1;
+          transform: scale(1);
+        }
+        .notifications-header {
+          display: flex; justify-content: space-between; align-items: center;
+          padding: 16px 20px; background-color: var(--primary); color: white;
+        }
+        .notifications-title {
+          margin: 0; font-weight: 600; font-size: 1.1rem;
+        }
+        .close-notifications {
+          background: none; border: none; color: white; font-size: 24px;
+          cursor: pointer; transition: transform 0.2s ease;
+        }
+        .close-notifications:hover { transform: scale(1.2); }
+        .notifications-actions {
+          padding: 12px 20px; background-color: #f5f5f5;
+          border-bottom: 1px solid var(--border); text-align: right;
+        }
+        .notifications-actions .btn { margin-left: 0.5rem; }
+        .notifications-list {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          max-height: 100px; /* Atur tinggi maksimum sesuai keinginan Anda */
+          overflow-y: auto; /* Tambahkan scrollbar vertikal jika konten melebihi max-height */
+        }
+        .notification-item {
+          padding: 16px 20px; border-bottom: 1px solid var(--border);
+          position: relative; cursor: pointer;
+          transition: background-color 0.2s ease;
+        }
+        .notification-item.unread {
+          background-color: var(--notification-unread);
+          border-left: 4px solid var(--primary);
+        }
+        .notification-item:hover {
+          background-color: #f9f9f9;
+        }
+        .notification-item h4 {
+          font-size: 1rem; font-weight: 600; margin-bottom: 5px; padding-right: 30px;
+        }
+        .notification-item p {
+          font-size: 0.9rem; margin-bottom: 8px; color: var(--light-text);
+        }
+        .notification-item small {
+          font-size: 0.75rem; color: var(--light-text);
+        }
+        .notification-delete {
+          position: absolute; top: 16px; right: 16px;
+          background: none; border: none; color: var(--danger);
+          font-size: 16px; cursor: pointer; opacity: 0.6;
+          transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .notification-delete:hover { opacity: 1; transform: scale(1.1); }
+        .no-notifications {
+          padding: 30px 20px; text-align: center;
+          color: var(--light-text); font-style: italic;
+        }
+
+        /* Main content */
+        .main-content { padding-top: 80px; flex: 1; }
+
+        /* Footer */
+        footer {
+          background-color: var(--primary); color: white;
+          padding: 25px 0; text-align: center; margin-top: 40px;
+        }
+        footer p { margin-bottom: 0; }
+
+        /* Sweet Alert */
+        .swal2-popup { font-family: 'Poppins', sans-serif; border-radius: 12px; }
+        .swal2-title { font-weight: 600; }
+        .swal2-confirm { background-color: var(--primary) !important; border-radius: 4px !important; }
+        .swal2-cancel { border-radius: 4px !important; }
+
+        /* Animations (digunakan oleh panel notifikasi) */
+        /* Tidak perlu @keyframes fadeIn lagi karena transisi langsung di .notifications-panel */
+      </style>
+    </head>
+    <body>
+      <a href="#main-content" class="skip-link">Lewati ke konten utama</a>
+      <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-info fixed-top">
+          <div class="container">
+            <a class="navbar-brand" href="#/">
+              <img src="images/logo.png" alt="Logo StoryApp" class="logo d-inline-block align-text-top" />
+              StoryApp
+            </a>
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navigation-drawer"
+              aria-controls="navigation-drawer"
+              aria-expanded="false"
+              aria-label="Tombol menu"
+            >
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navigation-drawer">
+              <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" href="#/"><i class="fas fa-home me-1"></i> Beranda</a></li>
+                <li class="nav-item"><a class="nav-link" href="#/map"><i class="fas fa-map-location-dot me-1"></i> Tampilan Peta</a></li>
+                <li id="nav-add-story" class="nav-item hidden"><a class="nav-link" href="#/add"><i class="fas fa-plus-circle me-1"></i> Tambah Cerita</a></li>
+                <li class="nav-item"><a class="nav-link" href="#/about"><i class="fas fa-info-circle me-1"></i> Tentang</a></li>
+                <li id="nav-logout" class="nav-item hidden"><button id="logout-btn" class="btn btn-outline-light ms-lg-2"><i class="fas fa-sign-out-alt me-1"></i> Keluar</button></li>
+                <li id="nav-login" class="nav-item"><a class="nav-link" href="#/login"><i class="fas fa-sign-in-alt me-1"></i> Masuk</a></li>
+                <li id="nav-register" class="nav-item"><a class="btn btn-primary ms-lg-2" href="#/register"><i class="fas fa-user-plus me-1"></i> Daftar</a></li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      <button id="notification-bell" class="notification-bell hidden" aria-label="Notifikasi">
+        <i class="fas fa-bell"></i>
+        <span id="notification-badge" class="notification-badge" style="display:none">0</span>
+      </button>
+      <div id="notifications-panel" class="notifications-panel hidden">
+        <div class="notifications-header">
+          <h3 class="notifications-title"><i class="fas fa-bell me-2"></i>Notifikasi</h3>
+          <button id="close-notifications" class="close-notifications" aria-label="Tutup"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="notifications-actions">
+          <button id="mark-all-read" class="btn btn-sm btn-light"><i class="fas fa-check-double me-1"></i> Tandai Semua Dibaca</button>
+          <button id="delete-all" class="btn btn-sm btn-light"><i class="fas fa-trash me-1 mt-2"></i> Hapus Semua</button>
+        </div>
+        <ul id="notifications-list" class="notifications-list">
+          <li class="no-notifications"><i class="fas fa-inbox me-2"></i>Tidak ada notifikasi</li>
+        </ul>
+      </div>
+
+      <div class="mt-3"></div>
+      
+      <main id="main-content" tabindex="2" class="main-content container mt-5 pt-3">
+        <p>Konten utama halaman...</p>
+      </main>
+
+      <footer class="mt-10">
+        <div class="container">
+          <p>&copy; 2025 StoryApp - Bagikan cerita Anda dengan lokasi</p>
+          <div class="mt-2">
+            <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="text-white me-3"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="text-white"><i class="fab fa-github"></i></a>
           </div>
         </div>
-      </nav>
-    </header>
+      </footer>
 
-    <button id="notification-bell" class="notification-bell hidden" aria-label="Notifikasi">
-      <i class="fas fa-bell"></i> <span id="notification-badge" class="notification-badge" style="display:none">0</span> </button>
-    <div id="notifications-panel" class="notifications-panel hidden">
-      <div class="notifications-header">
-        <h3 class="notifications-title"><i class="fas fa-bell me-2"></i>Notifikasi Saya</h3>
-        <button id="close-notifications" class="close-notifications" aria-label="Tutup panel notifikasi"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="notifications-actions"> <button id="mark-all-read" class="btn btn-sm btn-light"><i class="fas fa-check-double me-1"></i> Tandai Semua Dibaca</button>
-        <button id="delete-all" class="btn btn-sm btn-light"><i class="fas fa-trash me-1"></i> Hapus Semua</button> </div>
-      <ul id="notifications-list" class="notifications-list">
-        <li class="no-notifications"><i class="fas fa-inbox me-2"></i>Tidak ada notifikasi saat ini</li>
-      </ul>
-    </div>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+      <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+      <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
 
-    <div class="mt-3"></div> <main id="main-content" tabindex="-1" class="main-content container mt-5 pt-3"> 
-      <p>Konten utama halaman saya akan muncul di sini...</p> </main>
+      <script>
+        // Navigation and Auth
+        const navLogin = document.getElementById('nav-login');
+        const navRegister = document.getElementById('nav-register');
+        const navAddStory = document.getElementById('nav-add-story');
+        const navLogout = document.getElementById('nav-logout');
 
-    <footer class="mt-auto"> <div class="container">
-        <p>&copy; 2025 StoryApp - Bagikan cerita Anda dengan lokasi. Hak Cipta Dilindungi.</p> <div class="mt-2"> <a href="#" class="text-white me-3" aria-label="Facebook StoryApp"><i class="fab fa-facebook-f"></i></a>
-          <a href="#" class="text-white me-3" aria-label="Twitter StoryApp"><i class="fab fa-twitter"></i></a>
-          <a href="#" class="text-white me-3" aria-label="Instagram StoryApp"><i class="fab fa-instagram"></i></a>
-          <a href="#" class="text-white" aria-label="Github StoryApp"><i class="fab fa-github"></i></a>
-        </div>
-      </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script> <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script> <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script> <script>
-      // Bagian JavaScript buat ngatur navigasi dan status login
-      // Saya ambil dulu elemen-elemen navigasi yang mau diubah tampilannya
-      const navLogin = document.getElementById('nav-login');
-      const navRegister = document.getElementById('nav-register');
-      const navAddStory = document.getElementById('nav-add-story');
-      const navLogout = document.getElementById('nav-logout');
-
-      // Fungsi buat update tampilan navigasi berdasarkan status login
-      function updateNav() {
-        // Cek data login dari localStorage
-        const authData = JSON.parse(localStorage.getItem('storyapp_auth'));
-        const logged = !!authData?.token; // Anggap login kalau ada token
-
-        if (logged) { // Kalau udah login
-          navLogin.classList.add('hidden'); // Sembunyiin tombol Masuk
-          navRegister.classList.add('hidden'); // Sembunyiin tombol Daftar
-          navAddStory.classList.remove('hidden'); // Tampilin tombol Tambah Cerita
-          navLogout.classList.remove('hidden'); // Tampilin tombol Keluar
-          bell.classList.remove('hidden'); // Tampilin lonceng notifikasi
-        } else { // Kalau belum login
-          navLogin.classList.remove('hidden'); // Tampilin tombol Masuk
-          navRegister.classList.remove('hidden'); // Tampilin tombol Daftar
-          navAddStory.classList.add('hidden'); // Sembunyiin tombol Tambah Cerita
-          navLogout.classList.add('hidden'); // Sembunyiin tombol Keluar
-          bell.classList.add('hidden'); // Sembunyiin lonceng notifikasi
-          panel.classList.add('hidden'); // Pastikan panel notifikasi juga tersembunyi
+        function updateNav() {
+          const authData = JSON.parse(localStorage.getItem('storyapp_auth'));
+          const logged = !!authData?.token;
+          if (logged) {
+            navLogin.classList.add('hidden');
+            navRegister.classList.add('hidden');
+            navAddStory.classList.remove('hidden');
+            navLogout.classList.remove('hidden');
+            bell.classList.remove('hidden');
+          } else {
+            navLogin.classList.remove('hidden');
+            navRegister.classList.remove('hidden');
+            navAddStory.classList.add('hidden');
+            navLogout.classList.add('hidden');
+            bell.classList.add('hidden');
+            panel.classList.add('hidden'); // Sembunyikan panel jika logout
+          }
         }
-      }
 
-      // Event listener buat tombol logout
-      document.getElementById('logout-btn')?.addEventListener('click', () => {
-        Swal.fire({ // Konfirmasi dulu sebelum logout
-          title: 'Keluar Akun',
-          text: 'Apakah kamu yakin mau keluar dari akun StoryApp?',
-          icon: 'question',
-          showCancelButton: true,
-          confirmButtonText: 'Ya, Keluar Saja',
-          cancelButtonText: 'Eh, Gak Jadi',
-          confirmButtonColor: 'var(--primary)',
-          cancelButtonColor: 'var(--secondary)',
-        }).then((result) => {
-          if (result.isConfirmed) { // Kalau user milih "Ya"
-            
-            // --- PERBAIKAN DI SINI ---
-            // Sebelum hapus data login, saya kirim pesan ke Service Worker buat unsubscribe push notification
-            console.log('User mau logout nih. Saya coba bilang ke SW buat unsubscribe push notifications.');
-            postMessageToSW({ type: 'UNSUBSCRIBE_PUSH' }); 
-            // Service Worker akan coba unsubscribe dari push service browser dan juga dari server saya (kalau ada token).
-            // --- AKHIR PERBAIKAN ---
-
-            // Kasih jeda sedikit buat Service Worker memproses pesan unsubscribe,
-            // meskipun idealnya proses ini asynchronous dan mungkin butuh konfirmasi balik dari SW.
-            // Untuk sekarang, jeda singkat ini cukup buat ngirim pesannya.
-            setTimeout(() => {
-              localStorage.removeItem('storyapp_auth'); // Hapus data login dari localStorage
-              notifications = []; // Kosongin array notifikasi di sisi client
-              unreadCount = 0; // Reset jumlah notif belum dibaca
-              updateBadge(); // Update tampilan badge di lonceng
-              renderNotifications(); // Render ulang daftar notifikasi (jadi kosong)
-              updateNav(); // Update tampilan navbar
-              Swal.fire({ // Kasih tau kalau udah berhasil logout
-                title: 'Berhasil Keluar!',
-                text: 'Kamu sudah berhasil keluar. Sampai jumpa lagi!',
+        document.getElementById('logout-btn')?.addEventListener('click', () => {
+          Swal.fire({
+            title: 'Keluar',
+            text: 'Apakah Anda yakin ingin keluar?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Keluar',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: 'var(--primary)',
+            cancelButtonColor: 'var(--secondary)',
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // Beritahu SW untuk unsubscribe jika perlu
+              // postMessageToSW({ type: 'UNSUBSCRIBE' }); // Anda perlu endpoint di sini jika ingin unsubscribe dari server
+              localStorage.removeItem('storyapp_auth');
+              notifications = []; // Kosongkan notifikasi lokal
+              unreadCount = 0;
+              updateBadge();
+              renderNotifications();
+              updateNav(); // Update navbar
+              Swal.fire({
+                title: 'Berhasil Keluar',
+                text: 'Anda telah berhasil keluar dari akun.',
                 icon: 'success',
                 confirmButtonColor: 'var(--primary)',
-                timer: 2000, // Alert-nya nutup sendiri setelah 2 detik
+                timer: 2000,
                 timerProgressBar: true
               }).then(() => {
-                window.location.hash = '/'; // Arahkan ke halaman beranda
+                window.location.hash = '/'; // Arahkan ke beranda
+                // window.location.reload(); // Reload mungkin tidak perlu jika updateNav dan render sudah cukup
               });
-            }, 500); // Jeda 500ms, bisa disesuaikan kalau dirasa kurang/lebih
-          }
+            }
+          });
         });
-      });
 
-      // Bagian JavaScript buat ngatur UI Notifikasi
-      // Ambil dulu elemen-elemen UI notifikasi
-      const bell = document.getElementById('notification-bell');
-      const badge = document.getElementById('notification-badge');
-      const panel = document.getElementById('notifications-panel');
-      const closeBtn = document.getElementById('close-notifications');
-      const markAllBtn = document.getElementById('mark-all-read');
-      const deleteAllBtn = document.getElementById('delete-all');
-      const listEl = document.getElementById('notifications-list');
+        // Notification UI
+        const bell = document.getElementById('notification-bell');
+        const badge = document.getElementById('notification-badge');
+        const panel = document.getElementById('notifications-panel');
+        const closeBtn = document.getElementById('close-notifications');
+        const markAllBtn = document.getElementById('mark-all-read');
+        const deleteAllBtn = document.getElementById('delete-all');
+        const listEl = document.getElementById('notifications-list');
 
-      let notifications = []; // Array buat nyimpen semua notifikasi
-      let unreadCount = 0; // Jumlah notifikasi yang belum dibaca
+        let notifications = [];
+        let unreadCount = 0;
 
-      // Fungsi buat format waktu biar lebih enak dibaca
-      function formatTime(ts) {
-        if (!ts) return 'Waktu tidak diketahui'; // Jaga-jaga kalau timestamp gak ada
-        return new Date(ts).toLocaleString('id-ID', { // Format Indonesia
-          day: 'numeric', month: 'short', year: 'numeric',
-          hour: '2-digit', minute: '2-digit'
-        });
-      }
-
-      // Fungsi buat update angka di badge lonceng
-      function updateBadge() {
-        if (unreadCount > 0) {
-          badge.textContent = unreadCount > 99 ? '99+' : unreadCount; // Kalau lebih dari 99, tampilkan 99+
-          badge.style.display = 'flex'; // Tampilin badge-nya
-        } else {
-          badge.style.display = 'none'; // Sembunyiin kalau gak ada notif belum dibaca
+        function formatTime(ts) {
+          if (!ts) return 'Waktu tidak diketahui';
+          return new Date(ts).toLocaleString('id-ID', {
+            day: 'numeric', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+          });
         }
-      }
 
-      // Fungsi buat nampilin semua notifikasi di panel
-      function renderNotifications() {
-        listEl.innerHTML = ''; // Kosongin dulu list sebelumnya
-        if (notifications.length === 0) { // Kalau gak ada notifikasi
-          listEl.innerHTML = '<li class="no-notifications"><i class="fas fa-inbox me-2"></i>Hore, tidak ada notifikasi!</li>';
-          markAllBtn.disabled = true; // Nonaktifkan tombol "Tandai Semua"
-          deleteAllBtn.disabled = true; // Nonaktifkan tombol "Hapus Semua"
-          return;
+        function updateBadge() {
+          if (unreadCount > 0) {
+            badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+            badge.style.display = 'flex';
+          } else {
+            badge.style.display = 'none';
+          }
+        }
+
+        function renderNotifications() {
+          listEl.innerHTML = '';
+          if (notifications.length === 0) {
+            listEl.innerHTML = '<li class="no-notifications"><i class="fas fa-inbox me-2"></i>Tidak ada notifikasi</li>';
+            markAllBtn.disabled = true;
+            deleteAllBtn.disabled = true;
+            return;
+          }
+          
+          markAllBtn.disabled = notifications.filter(n => !n.read).length === 0;
+          deleteAllBtn.disabled = false;
+
+          notifications.forEach(n => {
+            const li = document.createElement('li');
+            li.className = n.read ? 'notification-item' : 'notification-item unread';
+            li.dataset.id = n.id;
+            
+            const title = n.title || 'Notifikasi';
+            const body = n.options?.body || 'Anda memiliki pesan baru.';
+            const timestamp = n.timestamp;
+
+            li.innerHTML = `
+              <h4>${title}</h4>
+              <p>${body}</p>
+              <small><i class="far fa-clock me-1"></i>${formatTime(timestamp)}</small>
+              <button class="notification-delete" aria-label="Hapus Notifikasi"><i class="fas fa-trash-alt"></i></button>
+            `;
+            // Event listener untuk menandai sebagai dibaca (jika belum) atau membuka notifikasi
+            li.addEventListener('click', () => {
+              if (!n.read) {
+                markAsRead(n.id);
+              }
+              // Jika ada URL di notifikasi, Anda bisa navigasi ke sana
+              if (n.options?.data?.url) {
+                  // Coba navigasi jika URL valid, misal:
+                  // window.location.hash = n.options.data.url;
+                  // panel.classList.add('hidden');
+                  console.log('Notification clicked, URL:', n.options.data.url);
+              }
+            });
+            li.querySelector('.notification-delete').addEventListener('click', e => {
+              e.stopPropagation(); // Mencegah event click pada li
+              deleteNotification(n.id);
+            });  
+            listEl.appendChild(li);
+          });
+        }
+
+        async function postMessageToSW(message) {
+          if (!navigator.serviceWorker || !navigator.serviceWorker.ready) {
+            console.warn('Service Worker tidak siap atau tidak didukung.');
+            Swal.fire('Error', 'Service Worker tidak siap. Coba refresh halaman.', 'error');
+            return;
+          }
+          try {
+            const registration = await navigator.serviceWorker.ready;
+            if (registration.active) {
+              registration.active.postMessage(message);
+            } else {
+              console.warn('Tidak ada Service Worker aktif.');
+              Swal.fire('Error', 'Service Worker tidak aktif. Coba refresh halaman.', 'error');
+            }
+          } catch (error) {
+              console.error('Error mengirim pesan ke SW:', error);
+              Swal.fire('Error', 'Gagal berkomunikasi dengan Service Worker.', 'error');
+          }
         }
         
-        // Aktif/nonaktifkan tombol berdasarkan kondisi notifikasi
-        markAllBtn.disabled = notifications.filter(n => !n.read).length === 0; // Nonaktifkan kalau semua udah dibaca
-        deleteAllBtn.disabled = false; // Aktifkan kalau ada notifikasi
-
-        notifications.forEach(n => { // Loop untuk setiap notifikasi
-          const li = document.createElement('li');
-          li.className = n.read ? 'notification-item' : 'notification-item unread'; // Kasih class 'unread' kalau belum dibaca
-          li.dataset.id = n.id; // Simpen ID notifikasi di data attribute
-          
-          // Ambil judul dan isi notifikasi, kasih default kalau gak ada
-          const title = n.title || 'Notifikasi StoryApp';
-          const body = n.options?.body || 'Kamu punya pesan baru, nih.';
-          const timestamp = n.timestamp;
-
-          li.innerHTML = `
-            <h4>${title}</h4>
-            <p>${body}</p>
-            <small><i class="far fa-clock me-1"></i>${formatTime(timestamp)}</small>
-            <button class="notification-delete" aria-label="Hapus Notifikasi Ini"><i class="fas fa-trash-alt"></i></button>
-          `;
-          // Event listener buat item notifikasi (kalau di-klik)
-          li.addEventListener('click', () => {
-            if (!n.read) { // Kalau belum dibaca, tandai sebagai sudah dibaca
-              markAsRead(n.id);
-            }
-            // Kalau notifikasinya punya URL, saya bisa arahin user ke sana
-            if (n.options?.data?.url) {
-              console.log('Notifikasi di-klik, URL target:', n.options.data.url);
-              // Contoh navigasi:
-              // window.location.hash = n.options.data.url; 
-              // panel.classList.add('hidden'); // Tutup panel setelah klik
-            }
-          });
-          // Event listener buat tombol hapus di tiap item notifikasi
-          li.querySelector('.notification-delete').addEventListener('click', e => {
-            e.stopPropagation(); // Biar gak nge-trigger event click di `li` juga
-            deleteNotification(n.id);
-          });  
-          listEl.appendChild(li); // Tambahin item notifikasi ke daftar
-        });
-      }
-
-      // Fungsi buat kirim pesan ke Service Worker
-      async function postMessageToSW(message) {
-        if (!navigator.serviceWorker || !navigator.serviceWorker.ready) {
-          console.warn('Service Worker belum siap atau gak didukung sama browser ini.');
-          Swal.fire('Oops...', 'Service Worker belum siap nih. Coba refresh halaman kamu.', 'error');
-          return;
-        }
-        try {
-          // Tunggu SW bener-bener siap
-          const registration = await navigator.serviceWorker.ready;
-          if (registration.active) { // Pastikan ada SW yang aktif
-            registration.active.postMessage(message); // Kirim pesannya
-          } else {
-            console.warn('Gak ada Service Worker yang aktif saat ini.');
-            Swal.fire('Oops...', 'Service Worker lagi gak aktif. Coba refresh halaman kamu.', 'error');
+        function markAsRead(id) {
+          const item = notifications.find(x => x.id === id);
+          if (item && !item.read) {
+            // Update optimistik di client
+            item.read = true;
+            unreadCount = Math.max(0, unreadCount - 1); // Pastikan tidak negatif
+            updateBadge();
+            renderNotifications(); // Re-render untuk menghilangkan .unread class
+            postMessageToSW({ type: 'MARK_AS_READ', id });
           }
-        } catch (error) {
-            console.error('Gagal total kirim pesan ke SW:', error);
-            Swal.fire('Oops...', 'Gagal komunikasi sama Service Worker nih.', 'error');
         }
-      }
-      
-      // Fungsi buat nandain notifikasi sebagai sudah dibaca
-      function markAsRead(id) {
-        const item = notifications.find(x => x.id === id); // Cari notifikasinya di array
-        if (item && !item.read) { // Kalau ketemu dan belum dibaca
-          // Update tampilan di client dulu (optimistic update)
-          item.read = true;
-          unreadCount = Math.max(0, unreadCount - 1); // Kurangi jumlah belum dibaca, pastikan gak minus
-          updateBadge(); // Update angka di lonceng
-          renderNotifications(); // Render ulang list biar class 'unread' ilang
-          // Kirim pesan ke SW buat update di IndexedDB juga
-          postMessageToSW({ type: 'MARK_AS_READ', id });
-        }
-      }
 
-      // Fungsi buat hapus satu notifikasi
-      function deleteNotification(id) {
-        const itemIndex = notifications.findIndex(x => x.id === id); // Cari index notifikasinya
-        if (itemIndex > -1) { // Kalau ketemu
-          const item = notifications[itemIndex];
-          // Update tampilan di client dulu (optimistic update)
-          if (!item.read) { // Kalau yang dihapus belum dibaca, kurangi juga unreadCount
-            unreadCount = Math.max(0, unreadCount - 1);
-          }
-          notifications.splice(itemIndex, 1); // Hapus dari array
-          updateBadge(); // Update angka di lonceng
-          renderNotifications(); // Render ulang list
-          // Kirim pesan ke SW buat hapus dari IndexedDB
-          postMessageToSW({ type: 'DELETE_NOTIFICATION', id });
-          Swal.fire({ // Kasih toast notif singkat
-            toast: true, position: 'top-end', icon: 'success',
-            title: 'Notifikasi berhasil dihapus!', showConfirmButton: false, timer: 1500
-          });
-        }
-      }
-
-      // Event listener buat tombol "Tandai Semua Dibaca"
-      markAllBtn.addEventListener('click', () => {
-        const unreadNotifications = notifications.filter(n => !n.read);
-        if (unreadNotifications.length === 0) { // Kalau emang udah gak ada yang belum dibaca
-          Swal.fire({ icon: 'info', title: 'Info', text: 'Semua notifikasi sudah terbaca.' });
-          return;
-        }
-        // Update tampilan di client dulu
-        unreadNotifications.forEach(n => n.read = true);
-        unreadCount = 0; // Reset jadi 0
-        updateBadge();
-        renderNotifications();
-        // Kirim pesan ke SW
-        postMessageToSW({ type: 'MARK_ALL_AS_READ' });
-        Swal.fire({ icon: 'success', title: 'Sip!', text: 'Semua notifikasi sudah ditandai terbaca.' });
-      });
-
-      // Event listener buat tombol "Hapus Semua"
-      deleteAllBtn.addEventListener('click', () => {
-        if (notifications.length === 0) { // Kalau emang gak ada notifikasi
-          Swal.fire({ icon: 'info', title: 'Kosong Melompong', text: 'Gak ada notifikasi buat dihapus.' });
-          return;
-        }
-        // Konfirmasi dulu sebelum hapus semua
-        Swal.fire({
-          title: 'Yakin mau hapus semua notifikasi?',
-          text: 'Aksi ini gak bisa dibalikin loh. Semua notifikasi kamu bakal hilang dari daftar ini.',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'Ya, Hapus Semua Aja!',
-          cancelButtonText: 'Eh, Jangan Deh',
-          confirmButtonColor: 'var(--danger)', // Tombol hapus warnanya merah
-          cancelButtonColor: 'var(--secondary)',
-        }).then(res => {
-          if (res.isConfirmed) { // Kalau user yakin
-            // Update tampilan di client dulu
-            notifications = [];
-            unreadCount = 0;
+        function deleteNotification(id) {
+          const itemIndex = notifications.findIndex(x => x.id === id);
+          if (itemIndex > -1) {
+            const item = notifications[itemIndex];
+            // Update optimistik
+            if (!item.read) {
+              unreadCount = Math.max(0, unreadCount - 1);
+            }
+            notifications.splice(itemIndex, 1);
             updateBadge();
             renderNotifications();
-            // Kirim pesan ke SW
-            postMessageToSW({ type: 'CLEAR_NOTIFICATIONS' });
-            Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Semua notifikasi sudah bersih dari daftar.' });
+            postMessageToSW({ type: 'DELETE_NOTIFICATION', id });
+            Swal.fire({
+                toast: true, position: 'top-end', icon: 'success',
+                title: 'Notifikasi dihapus', showConfirmButton: false, timer: 1500
+            });
           }
-        });
-      });
-
-      // Event listener buat buka/tutup panel notifikasi pas lonceng di-klik
-      bell.addEventListener('click', () => {
-        panel.classList.toggle('hidden'); // Toggle class 'hidden'
-      });
-      // Event listener buat tombol close 'X' di panel
-      closeBtn.addEventListener('click', () => panel.classList.add('hidden'));
-
-      // Kalau user klik di luar area panel notifikasi, panelnya nutup sendiri
-      document.addEventListener('click', (event) => {
-        const isClickInsidePanel = panel.contains(event.target); // Cek apakah klik di dalam panel
-        const isClickOnBell = bell.contains(event.target); // Cek apakah klik di lonceng
-        // Kalau kliknya bukan di panel DAN bukan di lonceng, DAN panelnya lagi kebuka
-        if (!isClickInsidePanel && !isClickOnBell && !panel.classList.contains('hidden')) {
-          panel.classList.add('hidden'); // Tutup panelnya
         }
-      });
 
+        markAllBtn.addEventListener('click', () => {
+          const unreadNotifications = notifications.filter(n => !n.read);
+          if (unreadNotifications.length === 0) {
+            Swal.fire({ icon: 'info', title: 'Informasi', text: 'Tidak ada notifikasi yang belum dibaca.' });
+            return;
+          }
+          // Update optimistik
+          unreadNotifications.forEach(n => n.read = true);
+          unreadCount = 0;
+          updateBadge();
+          renderNotifications();
+          postMessageToSW({ type: 'MARK_ALL_AS_READ' });
+          Swal.fire({ icon: 'success', title: 'Selesai', text: 'Semua notifikasi telah ditandai sebagai dibaca.' });
+        });
 
-      // Registrasi Service Worker dan pengaturan komunikasi dua arah
-      if ('serviceWorker' in navigator) { // Cek dulu browsernya dukung SW apa gak
-        window.addEventListener('load', async () => { // Tunggu semua aset halaman ke-load dulu
-          try {
-            // Daftarin file sw.js saya, scope-nya '/' berarti ngontrol semua halaman di root domain
-            const registration = await navigator.serviceWorker.register('./sw.js', { scope: '/' });
-            console.log('Service Worker berhasil saya daftarkan! Scope:', registration.scope);
-
-            // Fungsi buat kirim data awal (token & minta notif) ke SW yang aktif
-            const sendInitialDataToSW = (swInstance) => {
-                if (!swInstance) { // Jaga-jaga kalau SW-nya gak ada
-                    console.warn('Instance SW gak ketemu pas mau kirim data awal.');
-                    return;
-                }
-                console.log('Mau kirim data awal (token & minta notif) ke SW nih.');
-                const authData = JSON.parse(localStorage.getItem('storyapp_auth'));
-                if (authData?.token) { // Kalau ada token di localStorage
-                    swInstance.postMessage({ type: 'AUTH_TOKEN', token: authData.token }); // Kirim tokennya ke SW
-                }
-                // Kasih jeda dikit setelah kirim AUTH_TOKEN, baru minta semua notifikasi dari SW
-                // Ini buat ngasih waktu SW nyimpen token dan mungkin proses subscribe dulu
-                setTimeout(() => {
-                    swInstance.postMessage({ type: 'GET_ALL_NOTIFICATIONS' });
-                    console.log('Pesan GET_ALL_NOTIFICATIONS udah dikirim ke SW.');
-                }, 250); // Jeda 250ms, bisa disesuaikan
-            };
-
-            // Cek apakah udah ada SW yang ngontrol halaman ini
-            if (navigator.serviceWorker.controller) {
-                console.log('Halaman ini udah dikontrol sama SW. Langsung kirim data awal.');
-                sendInitialDataToSW(navigator.serviceWorker.controller);
-            } else {
-                // Kalau belum ada yang ngontrol, mungkin SW baru diinstall atau lagi update
-                // Dengerin event 'updatefound' buat tahu kalau ada SW baru lagi diinstall
-                registration.addEventListener('updatefound', () => {
-                    const newWorker = registration.installing; // Ini SW yang baru
-                    newWorker.addEventListener('statechange', () => {
-                        // Kalau SW baru udah 'activated' dan sekarang udah ngontrol halaman
-                        if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
-                            console.log('SW baru udah aktif dan ngontrol. Kirim data awal.');
-                            sendInitialDataToSW(navigator.serviceWorker.controller);
-                        }
-                    });
-                });
-                // Kadang SW baru diinstall dan langsung aktif (karena clients.claim()), tapi halaman belum langsung dikontrol.
-                // Jadi, saya dengerin event 'controllerchange'.
-                if (registration.active && !navigator.serviceWorker.controller) {
-                    navigator.serviceWorker.addEventListener('controllerchange', () => {
-                        if(navigator.serviceWorker.controller) {
-                            console.log('SW sekarang ngontrol halaman setelah event controllerchange. Kirim data awal.');
-                            sendInitialDataToSW(navigator.serviceWorker.controller);
-                        }
-                    }, { once: true }); // Saya set 'once: true' biar event listener ini cuma jalan sekali aja
-                } else if (registration.active) {
-                  // Ini kasus kalau SW udah aktif dari instalasi pertama tapi belum ngontrol,
-                  // atau SW baru aja aktif.
-                  sendInitialDataToSW(registration.active);
-                }
+        deleteAllBtn.addEventListener('click', () => {
+          if (notifications.length === 0) {
+            Swal.fire({ icon: 'info', title: 'Kosong', text: 'Tidak ada notifikasi untuk dihapus.' });
+            return;
+          }
+          Swal.fire({
+            title: 'Hapus Semua Notifikasi?',
+            text: 'Tindakan ini akan menghapus semua notifikasi dari daftar. Tindakan ini tidak dapat dikembalikan.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Hapus Semua',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: 'var(--danger)',
+            cancelButtonColor: 'var(--secondary)',
+          }).then(res => {
+            if (res.isConfirmed) {
+              // Update optimistik
+              notifications = [];
+              unreadCount = 0;
+              updateBadge();
+              renderNotifications();
+              postMessageToSW({ type: 'CLEAR_NOTIFICATIONS' });
+              Swal.fire({ icon: 'success', title: 'Terhapus', text: 'Semua notifikasi telah dihapus dari daftar.' });
             }
-            
-            // Dengerin pesan dari Service Worker
-            navigator.serviceWorker.addEventListener('message', ({ data }) => {
-              console.log('Ada pesan dari SW nih! Tipe:', data.type, 'Isinya:', data);
-              if (data.type === 'ALL_NOTIFICATIONS') { // Kalau SW kirim semua notifikasi
-                notifications = data.notifications || []; // Update array notifikasi saya, pastikan formatnya array
-                unreadCount = notifications.filter(n => !n.read).length; // Hitung ulang yang belum dibaca
-              } else if (data.type === 'NEW_NOTIFICATION') { // Kalau ada notifikasi baru dari SW
-                notifications.unshift(data.notification); // Tambahin ke paling atas array
-                if (!data.notification.read) unreadCount++; // Tambah jumlah belum dibaca
-                
-                // Tampilkan toast notifikasi singkat pakai SweetAlert
-                Swal.mixin({ 
-                  toast: true, position: 'top-end', showConfirmButton: false, 
-                  timer: 5000, timerProgressBar: true, 
-                  didOpen: (toast) => { 
-                    toast.addEventListener('mouseenter', Swal.stopTimer); 
-                    toast.addEventListener('mouseleave', Swal.resumeTimer); 
-                  }
-                }).fire({ 
-                  icon: 'info', 
-                  title: `Notifikasi Baru: ${data.notification.title || 'StoryApp'}`, 
-                  text: data.notification.options?.body || 'Ada kabar baru buat kamu!' 
-                });
-              }
-              // Berdasarkan sw.js yang udah direvisi, SW akan sering kirim 'ALL_NOTIFICATIONS' setelah ada perubahan.
-              // Jadi, mungkin saya gak perlu penanganan spesifik buat tipe pesan lain kayak 'NOTIFICATION_UPDATED'
-              // kecuali kalau SW cuma kirim ID yang berubah.
+          });
+        });
 
-              notifications.sort((a, b) => b.timestamp - a.timestamp); // Selalu urutkan notifikasi, terbaru di atas
-              updateBadge(); // Update angka di lonceng
-              renderNotifications(); // Tampilkan ulang daftar notifikasi di panel
-            });
+        bell.addEventListener('click', () => {
+          panel.classList.toggle('hidden');
+        });
+        closeBtn.addEventListener('click', () => panel.classList.add('hidden'));
 
-          } catch (err) {
-            console.error('Registrasi Service Worker gagal total:', err);
-            Swal.fire({ icon: 'error', title: 'Waduh, Error!', text: `Gagal daftarin Service Worker: ${err.message}` });
+        // Klik di luar panel notifikasi untuk menutupnya
+        document.addEventListener('click', (event) => {
+          const isClickInsidePanel = panel.contains(event.target);
+          const isClickOnBell = bell.contains(event.target);
+          if (!isClickInsidePanel && !isClickOnBell && !panel.classList.contains('hidden')) {
+              panel.classList.add('hidden');
           }
         });
-      } else { // Kalau browser gak dukung SW
-        Swal.fire({ icon: 'warning', title: 'Peringatan Browser', text: 'Sayang sekali, browser kamu gak dukung Service Worker. Beberapa fitur mungkin gak jalan.' });
-      }
 
-      // Alert sambutan buat user baru
-      window.addEventListener('DOMContentLoaded', () => { // Pastikan semua elemen halaman udah siap
-        // Saya pakai localStorage buat nandain user udah pernah buka atau belum, key-nya saya bikin lebih spesifik
-        if (!localStorage.getItem('visited_before_storyapp')) { 
-          setTimeout(() => { // Kasih jeda dikit biar gak langsung muncul
-            Swal.fire({ 
-              title: 'Selamat Datang di StoryApp Saya!', 
-              text: 'Di sini kamu bisa bagiin cerita dan pengalaman lokasimu ke seluruh dunia. Yuk, jelajahi, buat cerita, dan terhubung dengan yang lain!', 
-              icon: 'info', 
-              confirmButtonColor: 'var(--primary)' 
-            });
-            localStorage.setItem('visited_before_storyapp', 'true'); // Tandain kalau udah pernah munculin alert ini
-          }, 1000); // Muncul setelah 1 detik
+
+        // Service Worker registration & messaging
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', async () => {
+            try {
+              const registration = await navigator.serviceWorker.register('./sw.js', { scope: '/' });
+              console.log('Service Worker Registered:', registration.scope);
+
+              const sendInitialDataToSW = (swInstance) => {
+                  if (!swInstance) {
+                      console.warn('SW instance not available for initial data.');
+                      return;
+                  }
+                  console.log('Sending initial data to SW.');
+                  const authData = JSON.parse(localStorage.getItem('storyapp_auth'));
+                  if (authData?.token) {
+                      swInstance.postMessage({ type: 'AUTH_TOKEN', token: authData.token });
+                  }
+                  // Beri sedikit jeda setelah AUTH_TOKEN, lalu minta notifikasi
+                  setTimeout(() => {
+                      swInstance.postMessage({ type: 'GET_ALL_NOTIFICATIONS' });
+                      console.log('GET_ALL_NOTIFICATIONS message sent to SW.');
+                  }, 250); 
+              };
+
+              if (navigator.serviceWorker.controller) {
+                  console.log('SW is controlling. Sending initial data.');
+                  sendInitialDataToSW(navigator.serviceWorker.controller);
+              } else {
+                  // Menunggu SW baru untuk aktif dan mengontrol
+                  registration.addEventListener('updatefound', () => {
+                      const newWorker = registration.installing;
+                      newWorker.addEventListener('statechange', () => {
+                          if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
+                              console.log('New SW activated and controlling. Sending initial data.');
+                              sendInitialDataToSW(navigator.serviceWorker.controller);
+                          }
+                      });
+                  });
+                  // Jika SW baru diinstall dan langsung aktif (karena clients.claim())
+                  if (registration.active && !navigator.serviceWorker.controller) {
+                      // Ini bisa terjadi jika halaman dimuat sangat cepat setelah SW claim.
+                      // Menunggu controllerchange adalah pendekatan yang lebih aman.
+                      navigator.serviceWorker.addEventListener('controllerchange', () => {
+                          if(navigator.serviceWorker.controller) {
+                            console.log('SW now controlling after controllerchange. Sending initial data.');
+                            sendInitialDataToSW(navigator.serviceWorker.controller);
+                          }
+                      }, { once: true }); // Hanya jalankan sekali
+                  } else if(registration.active) {
+                      // Jika sudah ada SW aktif tapi tidak mengontrol (jarang terjadi jika claim ada)
+                      // atau untuk kasus SW baru saja diaktifkan dari instalasi awal
+                      sendInitialDataToSW(registration.active);
+                  }
+              }
+              
+              navigator.serviceWorker.addEventListener('message', ({ data }) => {
+                console.log('Message from SW:', data.type, data);
+                if (data.type === 'ALL_NOTIFICATIONS') {
+                  notifications = data.notifications || []; // Pastikan array
+                  unreadCount = notifications.filter(n => !n.read).length;
+                } else if (data.type === 'NEW_NOTIFICATION') {
+                  notifications.unshift(data.notification);
+                  if (!data.notification.read) unreadCount++;
+                  
+                  Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 5000, timerProgressBar: true, didOpen: (toast) => { toast.addEventListener('mouseenter', Swal.stopTimer); toast.addEventListener('mouseleave', Swal.resumeTimer); }})
+                    .fire({ icon: 'info', title: `Notifikasi Baru: ${data.notification.title || ''}`, text: data.notification.options?.body || '' });
+                }
+                // Setelah operasi di SW, ia akan mengirim ALL_NOTIFICATIONS. Jadi tidak perlu penanganan spesifik
+                // untuk NOTIFICATION_UPDATED, NOTIFICATION_REMOVED dll. jika SW selalu mengirim daftar lengkap.
+                // Jika SW hanya mengirim ID yang diubah, Anda perlu logika di sini.
+                // Berdasarkan sw.js yang direvisi, ALL_NOTIFICATIONS akan sering dikirim.
+
+                notifications.sort((a, b) => b.timestamp - a.timestamp); // Selalu urutkan
+                updateBadge();
+                renderNotifications();
+              });
+
+            } catch (err) {
+              console.error('Service Worker registration failed:', err);
+              Swal.fire({ icon: 'error', title: 'Error Registrasi SW', text: `Gagal mendaftarkan Service Worker: ${err.message}` });
+            }
+          });
+        } else {
+          Swal.fire({ icon: 'warning', title: 'Peringatan', text: 'Browser tidak mendukung Service Worker.' });
         }
-        updateNav(); // Panggil updateNav setelah DOM siap, buat nyesuain tampilan navbar
-      });
-    </script>
-  </body>
-</html>
+
+        // Welcome alert
+        window.addEventListener('DOMContentLoaded', () => {
+          if (!localStorage.getItem('visited_before_storyapp')) { // Gunakan key yang lebih spesifik
+            setTimeout(() => {
+              Swal.fire({ title: 'Selamat Datang di StoryApp!', text: 'Bagikan cerita dan pengalaman lokasimu dengan dunia. Jelajahi, buat, dan terhubung!', icon: 'info', confirmButtonColor: 'var(--primary)' });
+              localStorage.setItem('visited_before_storyapp', 'true');
+            }, 1000);
+          }
+          updateNav(); // Panggil updateNav setelah DOM siap
+        });
+      </script>
+    </body>
+  </html>
