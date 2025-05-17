@@ -14,6 +14,7 @@ Aplikasi web sederhana untuk berbagi cerita lengkap dengan lokasi menggunakan pe
 - [Fitur](#fitur)
 - [Teknologi](#teknologi)
 - [Lisensi](#lisensi)
+- [Dokumentasi File Publik](#dokumentasi-file-publik)
 
 ## Deskripsi
 
@@ -96,9 +97,13 @@ export default {
 project-root/
 ├── src/                                # Kode sumber aplikasi
 │   ├── public/                         # File publik (static assets)
-│   │   └── images/                     # Gambar dan ikon
-│   │       ├── logo.png
-│   │       └── favicon.png
+│   │   ├── images/                     # Gambar dan ikon
+│   │   │   ├── logo.png
+│   │   │   └── icons/                  # Folder yang menyimpan gambar dan icons.json untuk digunakan oleh ServiceWorker dan PWA
+│   │   ├── favicon.png
+│   │   ├── manifest.json               # Pengaturan Service Worker
+|   |   └── sw.js                       # Service Worker untuk PWA yang mengimplementasikan WorkBox
+|   |
 │   ├── scripts/                        # Logika aplikasi (SPA)
 │   │   ├── data/                       # Model - Akses data dan API
 │   │   │   └── api.js                  # Implementasi fetch API
@@ -170,6 +175,32 @@ Alur kerja MVP:
 - View Transitions API
 - http-server (serve static files)
 - Arsitektur MVP (Model-View-Presenter)
+
+## Dokumentasi File Publik
+
+### index.html
+File utama yang merupakan entry point dari aplikasi web. Berisi:
+- Struktur HTML dasar
+- Link ke CSS dan JavaScript
+- Komponen navigasi
+- Panel notifikasi
+- Konfigurasi awal untuk Service Worker
+- Event listener untuk navigasi dan notifikasi
+
+### sw.js
+Service Worker yang menangani:
+- **Caching**: Menyimpan aset statis untuk akses offline
+- **Push Notifications**: Menangani notifikasi push dari server
+- **IndexedDB**: Menyimpan notifikasi lokal
+- **Event Listeners**: Menangani event push dan notificationclick
+- **Komunikasi dengan Server**: Mengirim dan menerima data notifikasi
+
+### manifest.json
+File manifest untuk Progressive Web App (PWA) yang berisi:
+- Metadata aplikasi
+- Ikon untuk berbagai ukuran layar
+- Konfigurasi tampilan (standalone, background color, theme color)
+- Start URL untuk aplikasi
 
 ## Lisensi
 
