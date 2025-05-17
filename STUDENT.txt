@@ -1,2 +1,3 @@
 # STUDENT.txt
 Map Service: OpenStreetMap via Leaflet (tidak perlu API key)
+Link Aplikasi yang dideploy menggunakan netlify: https://storyapp-with-pwa-notify-by-carlireta.netlify.app/
