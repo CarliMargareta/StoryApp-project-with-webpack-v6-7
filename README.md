@@ -25,6 +25,8 @@ StoryApp adalah aplikasi frontend berbasis JavaScript yang memungkinkan pengguna
 3. Melihat detail cerita lengkap dengan tanggal, deskripsi, gambar, dan peta lokasi.
 4. Mendaftar dan masuk (login) untuk fitur tambah cerita.
 
+Aplikasi yang telah dideploy dapat diakses disini:[Carli Story Apps!](https://storyapp-with-pwa-notify-by-carlireta.netlify.app/)
+
 ## Prasyarat
 
 Pastikan Anda telah menginstal:
